@@ -1,0 +1,33 @@
+# Bytecode de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales (incluido el de Poetry)
+.venv/
+venv/
+env/
+ENV/
+
+# Poetry
+poetry.lock
+# (si quieres versionar el lock, quita esta línea)
+
+# Distribución / empaquetado
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+
+# Tests / cobertura
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Otros
+*.log
