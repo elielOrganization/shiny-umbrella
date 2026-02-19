@@ -13,7 +13,7 @@ try {
     // ==========================================
     // ¡IMPORTANTE! Cambia esto por la IP real de tu Odoo
     // Ejemplo: "http://192.168.1.50:8069/nfc/import_alumnos"
-    $odoo_url = "http://10.102.7.212:8069/nfc/import_alumnos"; 
+    $odoo_url = "http://10.102.7.244:8069/nfc/import_profesores"; 
 
     // ==========================================
     // PROCESAMIENTO

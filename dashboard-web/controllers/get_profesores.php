@@ -1,9 +1,10 @@
 <?php
-// controllers/get_alumnos.php
+// controllers/get_profesores.php
 header('Content-Type: application/json');
 
 // 1. CONFIGURACIÓN
-$odoo_url = "http://10.102.7.244:8069/nfc/get_alumnos"; 
+// Asegúrate de que la ruta final '/nfc/get_profesores' coincida exactamente con el endpoint que creaste en tu módulo de Odoo.
+$odoo_url = "http://10.102.7.244:8069/nfc/get_profesores"; 
 
 // 2. PREPARAR LA PETICIÓN JSON-RPC
 $payload = json_encode([

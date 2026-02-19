@@ -74,7 +74,7 @@ include '../includes/sidebar.php';
                         </div>
                         
                         <div class="filter-footer">
-                            <button id="btnClearFilters" type="button">Borrar</button>
+                            <button id="btnClearFilters" type="button" class="btnClearFilters">Borrar</button>
                             <button id="btnApplyFilters" class="btn-apply-filters" type="button">Aplicar filtros</button>
                         </div>
                     </div>
@@ -95,6 +95,7 @@ include '../includes/sidebar.php';
             <div class="text-center">Salida</div>
             <div class="text-center">Recreo</div>
             <div class="text-center">Transp.</div>
+            <div class="text-center">Acciones</div>
         </div>
 
         <div id="tableLoader" class="table-main-loader">
@@ -107,6 +108,11 @@ include '../includes/sidebar.php';
 </main>
 
 <?php include '../includes/modales_alumnado.php'; ?>
-<script src="../assets/js/script.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/alumnos/table.js?v=2"></script>
+<script src="../assets/js/alumnos/nfc.js"></script>
+<script src="../assets/js/alumnos/filters.js"></script>
+<script src="../assets/js/alumnos/csv.js"></script>
 </body>
 </html>

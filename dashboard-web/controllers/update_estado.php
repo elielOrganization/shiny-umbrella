@@ -1,24 +1,30 @@
 <?php
-// controllers/assign_card.php
-error_reporting(0);
-ini_set('display_errors', 0);
+// controllers/update_transporte.php
 header('Content-Type: application/json');
 
+error_reporting(0);
+ini_set('display_errors', 1);
+
 try {
-    $odoo_url = "http://10.102.7.244:8069/nfc/assign_card";
     $inputJSON = file_get_contents('php://input');
     $input = json_decode($inputJSON, true);
 
-    if (!isset($input['uid']) || !isset($input['dni'])) {
-        throw new Exception('Faltan datos: UID o DNI requeridos.');
+    $dni   = $input['dni'] ?? null;
+    $valor = $input['valor'] ?? false;
+
+
+    if (!$dni) {
+        throw new Exception('DNI no recibido');
     }
+
+    $odoo_url = "http://10.102.7.244:8069/nfc/update_estado_profesor"; 
 
     $payload = json_encode([
         "jsonrpc" => "2.0",
         "method" => "call",
         "params" => [
-            "uid" => $input['uid'],
-            "dni" => $input['dni']
+            "dni"   => $dni,
+            "estado" => $valor
         ]
     ]);
 
@@ -27,7 +33,7 @@ try {
             'header'  => "Content-Type: application/json\r\n",
             'method'  => 'POST',
             'content' => $payload,
-            'ignore_errors' => true // Importante para leer el error de Odoo
+            'ignore_errors' => true
         ]
     ];
 
@@ -35,14 +41,12 @@ try {
     $response = file_get_contents($odoo_url, false, $context);
 
     if ($response === FALSE) {
-        throw new Exception('No se pudo conectar con el servidor Odoo.');
+        throw new Exception('Error de conexión con Odoo');
     }
 
-    // Devolvemos la respuesta tal cual (Odoo ya manda el JSON con error o success)
     echo $response;
 
 } catch (Exception $e) {
-    // Si algo falla en el PHP, devolvemos un JSON estructurado de error
     echo json_encode([
         "jsonrpc" => "2.0",
         "error" => [

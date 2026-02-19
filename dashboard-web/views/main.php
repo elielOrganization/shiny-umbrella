@@ -53,6 +53,11 @@ include '../includes/sidebar.php';
     </div>
 </main>
 
-<script src="../assets/js/script.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/table.js"></script>
+<script src="../assets/js/filters.js"></script>
+<script src="../assets/js/csv.js"></script>
+<script src="../assets/js/nfc.js"></script>
 </body>
 </html>

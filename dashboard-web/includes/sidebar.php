@@ -15,7 +15,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="fa-solid fa-user-group"></i>
             <span class="nav-text">Alumnado</span>
         </li>
-        <li class="nav-item">
+        <li class="nav-item <?php echo ($current_page == 'profesores.php') ? 'active' : ''; ?>" onclick="window.location.href='profesores.php'">
             <i class="fa-solid fa-chalkboard-user"></i>
             <span class="nav-text">Profesorado</span>
         </li>

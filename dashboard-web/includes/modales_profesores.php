@@ -1,33 +1,33 @@
-<div id="csvModal" class="modal-overlay">
+<div id="csvProfModal" class="modal-overlay">
     <div class="modal-card">
-        <span class="close-modal">&times;</span>
-        <h3 class="modal-title">Importar Alumnado</h3>
+        <span class="close-modal" onclick="document.getElementById('csvProfModal').classList.remove('show')">&times;</span>
+        <h3 class="modal-title">Importar Profesores</h3>
         <p class="modal-subtitle">Arrastra tu archivo CSV aquí o haz clic para subirlo.</p>
         
-        <div class="upload-area" id="dropZone">
+        <div class="upload-area" id="dropZoneProf">
             <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
             <p>Suelta el archivo CSV aquí</p>
-            <input type="file" id="fileInput" accept=".csv" hidden>
+            <input type="file" id="fileInputProf" accept=".csv" hidden>
         </div>
         
-        <div class="processing-area" id="processingArea" style="display: none;">
-            <img src="../src/img/logo_umbrella.png" alt="Procesando" class="spinner-img" id="statusLogo">
-            <p class="status-text" id="statusText">Verificando archivo...</p>
+        <div class="processing-area" id="processingAreaProf" style="display: none;">
+            <img src="../src/img/logo_umbrella.png" alt="Procesando" class="spinner-img" id="statusLogoProf">
+            <p class="status-text" id="statusTextProf">Verificando archivo...</p>
         </div>
 
-        <a href="#" id="btnAñadirManual" style="display: inline-block; margin-top: 18px; color: var(--primary-blue); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        <a href="#" id="btnAñadirManualProf" style="display: inline-block; margin-top: 18px; color: var(--primary-blue); text-decoration: none; font-size: 0.9rem; font-weight: 500;">
             Añadir manualmente
         </a>
     </div>
 </div>
 
-<div id="manualStudentModal" class="modal-overlay">
+<div id="manualProfModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 600px;"> 
-        <span class="close-modal">&times;</span>
-        <h3 class="modal-title">Añadir Alumno Manualmente</h3>
-        <p class="modal-subtitle">Introduce los datos del nuevo alumno para registrarlo en el sistema.</p>
+        <span class="close-modal" onclick="document.getElementById('manualProfModal').classList.remove('show')">&times;</span>
+        <h3 class="modal-title">Añadir Profesor Manualmente</h3>
+        <p class="modal-subtitle">Introduce los datos del nuevo profesor para registrarlo en el sistema.</p>
         
-        <form id="formManualStudent" class="manual-form">
+        <form id="formManualProf" class="manual-form">
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nombre</label>
@@ -42,27 +42,23 @@
                     <input type="text" name="dni" placeholder="12345678Z" required>
                 </div>
                 <div class="form-group">
-                    <label>Fecha de Nacimiento</label>
-                    <input type="date" name="fecha_nacimiento" required>
-                </div>
-                <div class="form-group">
-                    <label>Grupo / Clase</label>
-                    <select name="grupo_clase" required>
-                        <option value="" disabled selected>Selecciona un grupo</option>
-                        <option value="1º ESO">1º ESO</option>
-                        <option value="2º ESO">2º ESO</option>
-                        <option value="3º ESO">3º ESO</option>
-                        <option value="4º ESO">4º ESO</option>
-                        <option value="1º BACH">1º BACH</option>
-                        <option value="2º BACH">2º BACH</option>
+                    <label>Departamento</label>
+                    <select name="departamento" required>
+                        <option value="" disabled selected>Selecciona un departamento</option>
+                        <option value="Matemáticas">Matemáticas</option>
+                        <option value="Lengua">Lengua</option>
+                        <option value="Inglés">Inglés</option>
+                        <option value="Ciencias">Ciencias</option>
+                        <option value="Historia">Historia</option>
+                        <option value="Tecnología">Tecnología</option>
                     </select>
                 </div>
             </div>
 
             <div class="modal-actions" style="margin-top: 30px; justify-content: flex-end; gap: 12px;">
-                <button type="button" class="btn-cancel">Cancelar</button>
+                <button type="button" class="btn-cancel" onclick="document.getElementById('manualProfModal').classList.remove('show')">Cancelar</button>
                 <button type="submit" class="btn-primary" style="padding: 10px 25px;">
-                    <i class="fa-solid fa-save"></i> Guardar Alumno
+                    <i class="fa-solid fa-save"></i> Guardar Profesor
                 </button>
             </div>
         </form>
@@ -135,11 +131,11 @@
             <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
         <h3 class="modal-title">¿Estás seguro?</h3>
-        <p class="modal-subtitle">Esta acción eliminará permanentemente al alumno <strong id="deleteAlumnoName"></strong> de la base de datos de Odoo.</p>
+        <p class="modal-subtitle">Esta acción eliminará permanentemente al profesor <strong id="deleteProfName"></strong> de la base de datos de Odoo.</p>
         
         <div class="confirm-actions">
             <button id="btnCancelDelete" class="btn-secondary">Cancelar</button>
-            <button id="btnConfirmDelete" class="btn-danger">Eliminar Alumno</button>
+            <button id="btnConfirmDelete" class="btn-danger">Eliminar Profesor</button>
         </div>
     </div>
 </div>
