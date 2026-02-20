@@ -1,3 +1,122 @@
+<style>
+/* --- Overlay con desenfoque --- */
+.modal-overlay-custom {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay-custom.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* --- Caja del Modal --- */
+.modal-box-vincular {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 35px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-top: 6px solid #007bff;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay-custom.show .modal-box-vincular {
+    transform: scale(1) translateY(0);
+}
+
+/* --- Icono y Estados --- */
+.nfc-icon-container {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.pulse-nfc-icon {
+    font-size: 4rem;
+    color: #007bff;
+    animation: pulse 2s infinite;
+}
+
+.status-img-nfc {
+    width: 85px;
+    display: none; /* Se activa por JS */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mensaje de estado */
+#nfcStatusMsgAlumnos {
+    margin-top: 20px;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.modal-box-vincular {
+    position: relative; /* Necesario para que la X se posicione respecto a la caja */
+    padding-top: 40px;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.close-modal-btn:hover {
+    color: #ef4444;
+}
+
+/* Estilos de los mensajes de Odoo */
+#nfcStatusMsgAlumnos {
+    margin-top: 20px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.msg-success { color: #10b981; }
+.msg-error { color: #ef4444; }
+
+/* Animación para el logo cuando está cargando */
+.spinning-umbrella {
+    animation: rotateUmbrella 2s linear infinite;
+}
+@keyframes rotateUmbrella {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+</style>
+
 <div id="csvModal" class="modal-overlay">
     <div class="modal-card">
         <span class="close-modal">&times;</span>
@@ -69,7 +188,7 @@
     </div>
 </div>
 
-<div id="nfcModal" class="modal-overlay">
+<!-- <div id="nfcModal" class="modal-overlay">
     <div class="modal-card">
         <span class="close-modal close-nfc">&times;</span>
         <h3 class="modal-title">Vincular Tarjeta NFC</h3>
@@ -140,6 +259,27 @@
         <div class="confirm-actions">
             <button id="btnCancelDelete" class="btn-secondary">Cancelar</button>
             <button id="btnConfirmDelete" class="btn-danger">Eliminar Alumno</button>
+        </div>
+    </div>
+</div> -->
+
+<div id="modalNfcAlumnos" class="modal-overlay-custom">
+    <div class="modal-box-vincular">
+        <span class="close-modal-btn" onclick="document.getElementById('modalNfcAlumnos').classList.remove('show')">&times;</span>
+        
+        <div class="nfc-icon-container">
+            <i id="iconWaiting" class="fa-solid fa-rss pulse-nfc-icon"></i>
+            <img id="imgStatusNfc" src="../assets/img/logo_umbrella.png" class="status-img-nfc" alt="Status" style="display:none;">
+        </div>
+
+        <h3>Vinculando NFC</h3>
+        <p style="color: #64748b; margin-bottom: 5px;">Alumno:</p>
+        <p><strong id="nfcStudentName" style="color: #007bff; font-size: 1.2rem;"></strong></p>
+        
+        <input type="text" id="nfcInputAlumnos" style="position: absolute; opacity: 0; pointer-events: none;">
+
+        <div id="nfcStatusMsgAlumnos" style="margin-top: 20px; font-weight: bold; min-height: 40px;">
+            <small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>
         </div>
     </div>
 </div>

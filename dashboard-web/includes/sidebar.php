@@ -19,7 +19,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="fa-solid fa-chalkboard-user"></i>
             <span class="nav-text">Profesorado</span>
         </li>
-        <li class="nav-item">
+        <li class="nav-item <?php echo ($current_page == 'vinculacion.php') ? 'active' : ''; ?>" onclick="window.location.href='vinculacion.php'">
             <i class="fa-solid fa-expand"></i>
             <span class="nav-text">Vinculación NFC</span>
         </li>

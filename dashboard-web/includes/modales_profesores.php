@@ -134,8 +134,54 @@
         <p class="modal-subtitle">Esta acción eliminará permanentemente al profesor <strong id="deleteProfName"></strong> de la base de datos de Odoo.</p>
         
         <div class="confirm-actions">
-            <button id="btnCancelDelete" class="btn-secondary">Cancelar</button>
-            <button id="btnConfirmDelete" class="btn-danger">Eliminar Profesor</button>
+            <button type="button" class="btn-cancel" id="btnCancelDeleteProf">Cancelar</button>
+            <button type="button" class="btn-primary" id="btnConfirmDeleteProf" style="background-color: #ef4444;">Eliminar Profesor</button>
         </div>
+    </div>
+</div>
+
+<div id="editProfModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 600px;"> 
+        <span class="close-modal" onclick="document.getElementById('editProfModal').classList.remove('show')">&times;</span>
+        <h3 class="modal-title">Editar Profesor</h3>
+        <p class="modal-subtitle">Modifica los datos del profesor en el sistema Odoo.</p>
+        
+        <form id="formEditProf" class="manual-form">
+            <input type="hidden" name="id_odoo" id="editProfId">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" id="editProfNombre" placeholder="Ej. Juan" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellidos</label>
+                    <input type="text" name="apellidos" id="editProfApellidos" placeholder="Ej. Pérez García" required>
+                </div>
+                <div class="form-group">
+                    <label>DNI / NIE</label>
+                    <input type="text" name="dni" id="editProfDni" placeholder="12345678Z" required disabled>
+                </div>
+                <div class="form-group">
+                    <label>Departamento</label>
+                    <select name="departamento" id="editProfDepartamento" required>
+                        <option value="" disabled>Selecciona un departamento</option>
+                        <option value="Matemáticas">Matemáticas</option>
+                        <option value="Lengua">Lengua</option>
+                        <option value="Inglés">Inglés</option>
+                        <option value="Ciencias">Ciencias</option>
+                        <option value="Historia">Historia</option>
+                        <option value="Tecnología">Tecnología</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 30px; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn-cancel" onclick="document.getElementById('editProfModal').classList.remove('show')">Cancelar</button>
+                <button type="submit" class="btn-primary" style="padding: 10px 25px;">
+                    <i class="fa-solid fa-save"></i> Actualizar
+                </button>
+            </div>
+        </form>
     </div>
 </div>

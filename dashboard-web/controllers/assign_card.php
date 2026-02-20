@@ -1,52 +1,42 @@
 <?php
 // controllers/assign_card.php
-error_reporting(0);
-ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-try {
-    $odoo_url = "http://10.102.7.244:8069/nfc/assign_card";
-    $inputJSON = file_get_contents('php://input');
-    $input = json_decode($inputJSON, true);
+$json = file_get_contents('php://input');
+$data = json_decode($json, true);
 
-    if (!isset($input['uid']) || !isset($input['dni'])) {
-        throw new Exception('Faltan datos: UID o DNI requeridos.');
-    }
+$odoo_url = "http://10.102.7.196:8069/nfc/assign_card"; 
 
-    $payload = json_encode([
-        "jsonrpc" => "2.0",
-        "method" => "call",
-        "params" => [
-            "uid" => $input['uid'],
-            "dni" => $input['dni']
-        ]
-    ]);
+$payload = json_encode([
+    "jsonrpc" => "2.0",
+    "method" => "call",
+    "params" => [
+        "uid" => $data['uid'],
+        "dni" => $data['dni']
+    ]
+]);
 
-    $options = [
-        'http' => [
-            'header'  => "Content-Type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => $payload,
-            'ignore_errors' => true // Importante para leer el error de Odoo
-        ]
-    ];
+$options = [
+    'http' => [
+        'header'  => "Content-Type: application/json\r\n",
+        'method'  => 'POST',
+        'content' => $payload
+    ]
+];
 
-    $context  = stream_context_create($options);
-    $response = file_get_contents($odoo_url, false, $context);
+$context  = stream_context_create($options);
+$response = file_get_contents($odoo_url, false, $context);
 
-    if ($response === FALSE) {
-        throw new Exception('No se pudo conectar con el servidor Odoo.');
-    }
+$odoo_data = json_decode($response, true);
 
-    // Devolvemos la respuesta tal cual (Odoo ya manda el JSON con error o success)
-    echo $response;
-
-} catch (Exception $e) {
-    // Si algo falla en el PHP, devolvemos un JSON estructurado de error
+// IMPORTANTE: Extraemos el resultado real de Odoo
+if (isset($odoo_data['error'])) {
+    // Error de servidor/protocolo
     echo json_encode([
-        "jsonrpc" => "2.0",
-        "error" => [
-            "data" => ["message" => $e->getMessage()]
-        ]
+        "status" => "error", 
+        "message" => $odoo_data['error']['data']['message'] ?? "Error interno en Odoo"
     ]);
+} else {
+    // Respuesta lógica de Odoo (nuestro status y message de Python)
+    echo json_encode($odoo_data['result']);
 }

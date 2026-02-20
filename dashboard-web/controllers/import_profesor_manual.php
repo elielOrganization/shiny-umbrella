@@ -11,7 +11,7 @@ try {
         throw new Exception("No se recibieron datos en el servidor local.");
     }
 
-    $odoo_url = "http://10.102.7.244:8069/nfc/create_profesor";
+    $odoo_url = "http://10.102.7.196:8069/nfc/create_profesor";
 
     $payload = json_encode([
         "jsonrpc" => "2.0",

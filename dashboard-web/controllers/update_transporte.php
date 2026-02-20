@@ -16,7 +16,7 @@ try {
         throw new Exception('DNI no recibido');
     }
 
-    $odoo_url = "http://10.102.7.244:8069/nfc/update_transporte"; 
+    $odoo_url = "http://10.102.7.196:8069/nfc/update_transporte"; 
 
     $payload = json_encode([
         "jsonrpc" => "2.0",

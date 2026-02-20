@@ -16,7 +16,7 @@ if (!$dni) {
     exit;
 }
 
-$odoo_url = "http://10.102.7.244:8069/nfc/delete_persona"; 
+$odoo_url = "http://10.102.7.196:8069/nfc/delete_persona"; 
 
 /**
  * Enviamos el DNI a Odoo. 

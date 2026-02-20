@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 // 1. CONFIGURACIÓN
-$odoo_url = "http://10.102.7.244:8069/nfc/get_alumnos"; 
+$odoo_url = "http://10.102.7.196:8069/nfc/get_alumnos"; 
 
 // 2. PREPARAR LA PETICIÓN JSON-RPC
 $payload = json_encode([
