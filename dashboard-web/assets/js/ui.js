@@ -1,4 +1,44 @@
 // ui.js
+
+// Tooltip genérico que sigue al ratón
+const _tooltip = document.createElement('div');
+_tooltip.id = 'tooltip-calculado';
+document.body.appendChild(_tooltip);
+
+function _showTooltip(text) {
+    _tooltip.textContent = text;
+    _tooltip.style.display = 'block';
+}
+
+function _hideTooltip() {
+    _tooltip.style.display = 'none';
+}
+
+document.addEventListener('mouseover', (e) => {
+    const campo = e.target.closest('.campo-calculado');
+    if (campo) {
+        _showTooltip('Campo calculado según la edad del alumno');
+        return;
+    }
+    const navItem = e.target.closest('.nav-item[data-tooltip]');
+    if (navItem && document.getElementById('sidebar')?.classList.contains('collapsed')) {
+        _showTooltip(navItem.dataset.tooltip);
+    }
+});
+
+document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('.campo-calculado') || e.target.closest('.nav-item[data-tooltip]')) {
+        _hideTooltip();
+    }
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (_tooltip.style.display === 'block') {
+        _tooltip.style.left = (e.clientX + 14) + 'px';
+        _tooltip.style.top  = (e.clientY - 28) + 'px';
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // Cerrar modales al hacer clic fuera del recuadro (Overlay)
     window.addEventListener('click', (e) => {
@@ -15,10 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Sidebar Toggle (Menú lateral)
+    // Sidebar Toggle (logo + botón circular)
     const logoToggle = document.getElementById('logoToggle');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
     const sidebar = document.getElementById('sidebar');
-    if (logoToggle && sidebar) {
-        logoToggle.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+    function toggleSidebar() {
+        if (sidebar) sidebar.classList.toggle('collapsed');
     }
+
+    if (logoToggle) logoToggle.addEventListener('click', toggleSidebar);
+    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
 });

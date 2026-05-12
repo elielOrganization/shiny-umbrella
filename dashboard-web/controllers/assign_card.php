@@ -1,11 +1,12 @@
 <?php
 // controllers/assign_card.php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
-$odoo_url = "http://10.102.7.196:8069/nfc/assign_card"; 
+$odoo_url = $ODOO_BASE . "/nfc/assign_card";
 
 $payload = json_encode([
     "jsonrpc" => "2.0",
@@ -37,6 +38,6 @@ if (isset($odoo_data['error'])) {
         "message" => $odoo_data['error']['data']['message'] ?? "Error interno en Odoo"
     ]);
 } else {
-    // Respuesta lógica de Odoo (nuestro status y message de Python)
+    // Respuesta lÃ³gica de Odoo (nuestro status y message de Python)
     echo json_encode($odoo_data['result']);
 }

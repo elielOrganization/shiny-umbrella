@@ -30,9 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Esperar y cerrar
                     setTimeout(async () => {
                         modal.style.display = "none";
-                        // Refrescar la tabla
-                        const cards = await API_NFC.obtenerTodas();
-                        UI_NFC.renderizarTabla(cards);
+                        await window.recargarTablaNfc();
                     }, 2000);
 
                 } else {
@@ -69,9 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const respuesta = await API_NFC.eliminar(uid);
                 if (respuesta.status === 'ok') {
                     UI_NFC.cerrarModalEliminar();
-                    // Refrescar tabla
-                    const cards = await API_NFC.obtenerTodas();
-                    UI_NFC.renderizarTabla(cards);
+                    await window.recargarTablaNfc();
                 } else {
                     alert("Error: " + respuesta.message);
                 }
@@ -94,9 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await API_NFC.desvincular(uid);
             if (res.status === 'ok') {
                 UI_NFC.cerrarModalDesvincular();
-                // Recargar tabla
-                const cards = await API_NFC.obtenerTodas();
-                UI_NFC.renderizarTabla(cards);
+                await window.recargarTablaNfc();
             } else {
                 alert(res.message);
             }

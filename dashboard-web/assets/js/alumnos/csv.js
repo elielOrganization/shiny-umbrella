@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 apellidos: this.querySelector('[name="apellidos"]').value.trim(),
                 dni: this.querySelector('[name="dni"]').value.trim(),
                 fecha_nacimiento: this.querySelector('[name="fecha_nacimiento"]').value,
-                grupo_clase: this.querySelector('[name="grupo_clase"]').value
+                grupo_clase: `${this.querySelector('[name="clase"]').value} ${this.querySelector('[name="seccion"]').value}`
             };
 
             const submitBtn = this.querySelector('button[type="submit"]');

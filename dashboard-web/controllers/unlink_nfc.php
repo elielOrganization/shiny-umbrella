@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 $json = file_get_contents('php://input');
@@ -9,7 +10,7 @@ if (!isset($data['uid'])) {
     exit;
 }
 
-$odoo_url = "http://10.102.7.196:8069/nfc/unassign_card"; 
+$odoo_url = $ODOO_BASE . "/nfc/unassign_card";
 
 $payload = json_encode([
     "jsonrpc" => "2.0",

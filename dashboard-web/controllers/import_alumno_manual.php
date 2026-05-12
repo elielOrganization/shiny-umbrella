@@ -1,6 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
-error_reporting(0); 
+error_reporting(0);
 ini_set('display_errors', 0);
 
 try {
@@ -11,7 +12,7 @@ try {
         throw new Exception("No se recibieron datos en el servidor local.");
     }
 
-    $odoo_url = "http://10.102.7.196:8069/nfc/create_alumno";
+    $odoo_url = $ODOO_BASE . "/nfc/create_alumno";
 
     $payload = json_encode([
         "jsonrpc" => "2.0",
@@ -25,7 +26,7 @@ try {
         ]
     ]);
 
-    // 5. Petición POST
+    // 5. PeticiÃ³n POST
     $options = [
         'http' => [
             'header'  => "Content-Type: application/json\r\n",
@@ -39,7 +40,7 @@ try {
     $response = file_get_contents($odoo_url, false, $context);
 
     if ($response === FALSE) {
-        throw new Exception("Error de conexión con Odoo.");
+        throw new Exception("Error de conexiÃ³n con Odoo.");
     }
 
     // Devolvemos la respuesta de Odoo (status, message, id)

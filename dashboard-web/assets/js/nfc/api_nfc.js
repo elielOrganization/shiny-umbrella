@@ -63,13 +63,27 @@ window.API_NFC = {
     }
 };
 
-// Carga inicial al estilo de eventos_profesores.js
-document.addEventListener('DOMContentLoaded', async () => {
+async function cargarTablaCompleta() {
     try {
-        const vinculaciones = await API_NFC.obtenerTodas();
-        UI_NFC.renderizarTabla(vinculaciones);
+        const [cards, dataAlumnos, dataProfesores] = await Promise.all([
+            API_NFC.obtenerTodas(),
+            fetch(GLOBALS.URL_GET_ALUMNOS).then(r => r.json()),
+            fetch(GLOBALS.URL_GET_PROFESORES).then(r => r.json())
+        ]);
+
+        const alumnos = dataAlumnos.result?.alumnos || [];
+        const profesores = dataProfesores.result?.profesores || [];
+
+        const mapaUid = {};
+        alumnos.forEach(a => { if (a.uid) mapaUid[a.uid] = `${a.nombre} ${a.apellido} (Alumno)`; });
+        profesores.forEach(p => { if (p.uid) mapaUid[p.uid] = `${p.nombre} ${p.apellido} (Profesor)`; });
+
+        UI_NFC.renderizarTabla(cards, mapaUid);
     } catch (error) {
         console.error("Error:", error);
         document.getElementById('tableBodyNfc').innerHTML = `<p style="color:red; padding:20px;">${error.message}</p>`;
     }
-});
+}
+
+document.addEventListener('DOMContentLoaded', cargarTablaCompleta);
+window.recargarTablaNfc = cargarTablaCompleta;

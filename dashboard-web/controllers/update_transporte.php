@@ -1,5 +1,6 @@
 <?php
 // controllers/update_transporte.php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 error_reporting(0);
@@ -16,7 +17,7 @@ try {
         throw new Exception('DNI no recibido');
     }
 
-    $odoo_url = "http://10.102.7.196:8069/nfc/update_transporte"; 
+    $odoo_url = $ODOO_BASE . "/nfc/update_transporte";
 
     $payload = json_encode([
         "jsonrpc" => "2.0",
@@ -40,7 +41,7 @@ try {
     $response = file_get_contents($odoo_url, false, $context);
 
     if ($response === FALSE) {
-        throw new Exception('Error de conexión con Odoo');
+        throw new Exception('Error de conexiÃ³n con Odoo');
     }
 
     echo $response;

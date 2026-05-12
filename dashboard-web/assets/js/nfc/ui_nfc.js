@@ -1,10 +1,8 @@
 // assets/js/nfc/ui_nfc.js
 window.UI_NFC = {
-    renderizarTabla: function(listaCards) {
+    renderizarTabla: function(listaCards, mapaUid = {}) {
         const tableBody = document.getElementById('tableBodyNfc');
         if (!tableBody) return;
-
-        // (Las validaciones de array se mantienen igual...)
 
         if (listaCards.length === 0) {
             tableBody.innerHTML = '<div style="padding:20px; text-align:center; color: #666;">No hay tarjetas registradas.</div>';
@@ -13,38 +11,40 @@ window.UI_NFC = {
 
         let html = '';
         listaCards.forEach((item, index) => {
-            // Usamos 'item.uid' como identificador único para las acciones
-            const cardUid = item.uid || ''; 
+            const cardUid = item.uid || '';
+            const persona = mapaUid[cardUid];
 
-            let botonDesvincular = '';
-            if (item.activo) {
-                botonDesvincular = `
-                    <button class="btn-shiny btn-orange-shiny" title="Desvincular" onclick="desvincularCard('${item.uid}')">
-                        <i class="fa-solid fa-link-slash"></i>
-                    </button>`;
-            } else {
-                botonDesvincular = `<div style="width: 30px;"></div>`; 
-            }
+            const vinculadoBadge = persona
+                ? `<span class="vinculado-badge"><i class="fa-solid fa-user"></i>${persona}</span>`
+                : `<span class="libre-badge"><i class="fa-solid fa-circle-minus"></i>Libre</span>`;
+
+            const botonDesvincular = item.activo
+                ? `<button class="btn-table-action edit" title="Desvincular" onclick="desvincularCard('${cardUid}')">
+                       <i class="fa-solid fa-link-slash"></i>
+                   </button>`
+                : `<div style="width:30px;"></div>`;
 
             html += `
-            <div class="table-row table-grid-nfc">
-                <div data-label="ID"><strong>${index + 1}</strong></div>
-                
-                <div data-label="UID">
-                    <code style="background: #f4f4f4; padding: 4px 8px; border-radius: 4px; font-family: monospace; color: #333;">
-                        ${cardUid || 'SIN UID'}
-                    </code>
+            <div class="table-row table-grid-nfc"
+                data-activo="${item.activo ? 'activo' : 'inactivo'}"
+                data-vinculo="${persona ? 'vinculada' : 'libre'}">
+                <div><strong>${index + 1}</strong></div>
+
+                <div>
+                    <span class="nfc-id-tag"><i class="fa-solid fa-rss"></i>${cardUid || 'SIN UID'}</span>
                 </div>
-                
-                <div class="text-center" data-label="Activo">
-                    <i class="fa-solid ${item.activo ? 'fa-circle-check' : 'fa-circle-xmark'}" 
-                    style="color: ${item.activo ? '#28a745' : '#dc3545'}; font-size: 1.2rem;"></i>
+
+                <div>${vinculadoBadge}</div>
+
+                <div class="text-center">
+                    <i class="fa-solid ${item.activo ? 'fa-circle-check' : 'fa-circle-xmark'}"
+                       style="color: ${item.activo ? '#16a34a' : '#dc3545'}; font-size: 1.2rem;"></i>
                 </div>
-                
-                <div class="text-center" data-label="Acciones">
+
+                <div class="text-center">
                     <div class="nfc-actions-wrapper">
                         ${botonDesvincular}
-                        <button class="btn-shiny btn-red-shiny" title="Eliminar" onclick="eliminarCard('${item.uid}')">
+                        <button class="btn-table-action delete" title="Eliminar" onclick="eliminarCard('${cardUid}')">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
@@ -52,6 +52,7 @@ window.UI_NFC = {
             </div>`;
         });
         tableBody.innerHTML = html;
+        if (typeof window.applyNfcFilters === 'function') window.applyNfcFilters();
     },
 
     abrirModalEliminar: function(uid) {

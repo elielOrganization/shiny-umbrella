@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Stop-Process -Name \"veyon-worker\", \"veyon-server\", \"veyon-service\" -Force -Confirm:$false)",
+      "PowerShell([System.IO.File]::ReadAllBytes\\(\"D:\\\\shiny-umbrella\\\\dashboard-web\\\\controllers\\\\get_alumnos.php\"\\) | Select-Object -First 4 | ForEach-Object { \"0x{0:X2}\" -f $_ })"
+    ]
+  }
+}

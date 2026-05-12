@@ -34,7 +34,7 @@ const AlumnosUI = {
 
                 <div>
                     ${tieneNFC 
-                        ? `<span class="uid-label">${alumno.uid}</span>` 
+                        ? `<span class="uid-label"><i class="fa-solid fa-rss"></i>${alumno.uid}</span>`
                         : `<button class="btn-vincular"  
                             data-dni="${dniLimpio}" 
                             data-nombre="${nombreCompleto}"
@@ -44,13 +44,13 @@ const AlumnosUI = {
                     }
                 </div>
 
-                <div class="bool-cell">
+                <div class="bool-cell campo-calculado" title="Campo calculado automáticamente según la edad del alumno">
                     <label class="switch">
                         <input type="checkbox" ${alumno.permiso_salida ? 'checked' : ''} disabled>
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div class="bool-cell">
+                <div class="bool-cell campo-calculado" title="Campo calculado automáticamente según la edad del alumno">
                     <label class="switch">
                         <input type="checkbox" ${alumno.permiso_recreo ? 'checked' : ''} disabled>
                         <span class="slider"></span>
@@ -67,8 +67,14 @@ const AlumnosUI = {
                 </div>
 
                 <div class="table-actions">
-                    <button class="btn-table-action edit" 
-                        onclick="prepararEdicionAlumno('${alumno.id}', '${alumno.nombre}', '${alumno.apellido}', '${alumno.dni}', '${alumno.fecha_nacimiento}', '${alumno.grupo_clase}')" >
+                    <button class="btn-table-action edit"
+                        data-id="${alumno.id}"
+                        data-nombre="${alumno.nombre || ''}"
+                        data-apellido="${alumno.apellido || ''}"
+                        data-dni="${alumno.dni || ''}"
+                        data-fecha="${alumno.fecha_nacimiento || ''}"
+                        data-grupo="${alumno.grupo_clase || ''}"
+                        onclick="prepararEdicionAlumno(this)">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <button class="btn-table-action delete" 

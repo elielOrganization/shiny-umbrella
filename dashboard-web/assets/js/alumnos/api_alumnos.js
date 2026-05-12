@@ -46,6 +46,15 @@ const AlumnosAPI = {
         return response.json();
     },
 
+    async updateAlumno(datos) {
+        const response = await fetch(GLOBALS.URL_UPDATE_PROFESOR, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        return response.json();
+    },
+
     async deleteAlumno(dni) {
         const response = await fetch(GLOBALS.URL_DELETE_PERSONA, {
             method: 'POST',

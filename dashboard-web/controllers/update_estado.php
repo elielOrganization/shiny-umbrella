@@ -1,9 +1,10 @@
 <?php
-// controllers/update_transporte.php
+// controllers/update_estado.php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 error_reporting(0);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 try {
     $inputJSON = file_get_contents('php://input');
@@ -12,12 +13,11 @@ try {
     $dni   = $input['dni'] ?? null;
     $valor = $input['valor'] ?? false;
 
-
     if (!$dni) {
         throw new Exception('DNI no recibido');
     }
 
-    $odoo_url = "http://10.102.7.196:8069/nfc/update_estado_profesor"; 
+    $odoo_url = $ODOO_BASE . "/nfc/update_estado_profesor";
 
     $payload = json_encode([
         "jsonrpc" => "2.0",
@@ -41,7 +41,7 @@ try {
     $response = file_get_contents($odoo_url, false, $context);
 
     if ($response === FALSE) {
-        throw new Exception('Error de conexión con Odoo');
+        throw new Exception('Error de conexiÃ³n con Odoo');
     }
 
     echo $response;

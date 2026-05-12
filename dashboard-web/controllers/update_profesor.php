@@ -1,10 +1,10 @@
 <?php
 /**
  * Controlador update_profesor.php mejorado
- * * Intermediario entre frontend y Odoo 18. Incluye validación de respuesta
+ * * Intermediario entre frontend y Odoo 18. Incluye validaciÃ³n de respuesta
  * para evitar errores de parseo JSON en el frontend si Odoo devuelve HTML.
  */
-
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 $inputData = json_decode(file_get_contents('php://input'), true);
@@ -14,7 +14,7 @@ if (!$inputData || !isset($inputData['id'])) {
     exit;
 }
 
-$odoo_url = "http://10.102.7.196:8069/nfc/update_persona";
+$odoo_url = $ODOO_BASE . "/nfc/update_persona";
 
 $payload_array = [
     "jsonrpc" => "2.0",
@@ -47,18 +47,18 @@ if ($response === FALSE) {
 }
 
 /**
- * Valida si la respuesta obtenida de Odoo es un JSON válido.
+ * Valida si la respuesta obtenida de Odoo es un JSON vÃ¡lido.
  * Si es HTML (por ejemplo, un error 404 de Odoo), devuelve un JSON con el aviso.
  */
 json_decode($response);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    // Si llegamos aquí, Odoo devolvió HTML (seguramente un 404 o un 500)
+    // Si llegamos aquÃ­, Odoo devolviÃ³ HTML (seguramente un 404 o un 500)
     echo json_encode([
-        'error' => 'Odoo devolvió un formato no válido (HTML). Verifica que la ruta /nfc/update_profesor existe en el controlador Python de Odoo.',
+        'error' => 'Odoo devolviÃ³ un formato no vÃ¡lido (HTML). Verifica que la ruta /nfc/update_profesor existe en el controlador Python de Odoo.',
         'odoo_raw_response' => substr($response, 0, 100) . '...' // Mostramos un fragmento para depurar
     ]);
     exit;
 }
 
-// Si es un JSON válido, lo devolvemos al frontend
+// Si es un JSON vÃ¡lido, lo devolvemos al frontend
 echo $response;

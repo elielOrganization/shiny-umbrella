@@ -1,10 +1,10 @@
 <?php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
-// 1. CONFIGURACIÓN (Ajusta la URL a tu endpoint de Odoo)
-$odoo_url = "http://10.102.7.196:8069/nfc/get_cards"; 
+$odoo_url = $ODOO_BASE . "/nfc/get_cards";
 
-// 2. PREPARAR LA PETICIÓN JSON-RPC
+// 2. PREPARAR LA PETICIÃ"N JSON-RPC
 $payload = json_encode([
     "jsonrpc" => "2.0",
     "method" => "call",

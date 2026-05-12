@@ -118,6 +118,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 4. EDICIÓN DE ALUMNOS ---
+    const formEditAlumno = document.getElementById('formEditAlumno');
+    if (formEditAlumno) {
+        formEditAlumno.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Actualizando...';
+            btn.disabled = true;
+
+            const clase = document.getElementById('editAlumnoClase').value;
+            const seccion = document.getElementById('editAlumnoSeccion').value;
+            const datos = {
+                id: document.getElementById('editAlumnoId').value,
+                nombre: document.getElementById('editAlumnoNombre').value.trim(),
+                apellidos: document.getElementById('editAlumnoApellidos').value.trim(),
+                dni: document.getElementById('editAlumnoDni').value.trim(),
+                fecha_nacimiento: document.getElementById('editAlumnoFecha').value,
+                grupo_clase: `${clase} ${seccion}`
+            };
+
+            try {
+                await AlumnosAPI.updateAlumno(datos);
+                document.getElementById('editAlumnoModal').classList.remove('show');
+                window.fetchAlumnos();
+            } catch (err) {
+                alert("Error al actualizar: " + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
+
     const nfcInput = document.getElementById('nfcInputAlumnos');
     const nfcMsg = document.getElementById('nfcStatusMsgAlumnos');
     const imgStatus = document.getElementById('imgStatusNfc');
@@ -183,6 +217,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+window.prepararEdicionAlumno = function(btn) {
+    const d = btn.dataset;
+    document.getElementById('editAlumnoId').value = d.id;
+    document.getElementById('editAlumnoNombre').value = d.nombre;
+    document.getElementById('editAlumnoApellidos').value = d.apellido;
+    document.getElementById('editAlumnoDni').value = d.dni;
+    document.getElementById('editAlumnoFecha').value = d.fecha;
+
+    // Separar "4º ESO B" → clase="4º ESO", seccion="B"
+    const partes = (d.grupo || '').trim().split(' ');
+    const seccion = partes.length > 1 ? partes[partes.length - 1] : '';
+    const clase = partes.length > 1 ? partes.slice(0, -1).join(' ') : d.grupo;
+    document.getElementById('editAlumnoClase').value = clase;
+    document.getElementById('editAlumnoSeccion').value = seccion;
+
+    document.getElementById('editAlumnoModal').classList.add('show');
+};
 
 window.prepararAsignacionNFC = function(btn) {
     // 1. Extraer los datos del botón

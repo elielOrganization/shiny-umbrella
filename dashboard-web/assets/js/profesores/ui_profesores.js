@@ -46,7 +46,7 @@ window.UI_Profesores = {
                 <div class="text-gray">${prof.departamento || ''}</div>
                 
                 <div>
-                    ${tieneNFC ? `<span class="nfc-id-tag">${prof.uid}</span>` : `<button class="btn-vincular" data-dni="${prof.dni}">Vincular</button>`}
+                    ${tieneNFC ? `<span class="nfc-id-tag"><i class="fa-solid fa-rss"></i>${prof.uid}</span>` : `<button class="btn-vincular" data-dni="${prof.dni}">Vincular</button>`}
                 </div>
 
                 <div class="text-center">

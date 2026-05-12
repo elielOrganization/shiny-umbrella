@@ -1,17 +1,17 @@
 <?php
-// controllers/save_vinculacion.php
+// controllers/import_nfc.php
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
 if (!isset($data['uid'])) {
-    echo json_encode(['error' => 'No se recibió el UID']);
+    echo json_encode(['error' => 'No se recibiÃ³ el UID']);
     exit;
 }
 
-// URL de tu endpoint en Odoo para registrar/vincular
-$odoo_url = "http://10.102.7.196:8069/nfc/registrar_tarjeta"; 
+$odoo_url = $ODOO_BASE . "/nfc/registrar_tarjeta";
 
 $payload = json_encode([
     "jsonrpc" => "2.0",

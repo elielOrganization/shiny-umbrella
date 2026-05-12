@@ -1,30 +1,25 @@
 <?php
-// controllers/import_odoo.php
+// controllers/import_profesor.php
+require_once __DIR__ . '/../config/odoo.php';
 
-// 1. Evitar que los errores de PHP salgan como HTML y rompan el JSON
-error_reporting(0); 
+error_reporting(0);
 ini_set('display_errors', 0);
 
 header('Content-Type: application/json');
 
 try {
-    // ==========================================
-    // CONFIGURACIÓN
-    // ==========================================
-    // ¡IMPORTANTE! Cambia esto por la IP real de tu Odoo
-    // Ejemplo: "http://192.168.1.50:8069/nfc/import_alumnos"
-    $odoo_url = "http://10.102.7.196:8069/nfc/import_profesores"; 
+    $odoo_url = $ODOO_BASE . "/nfc/import_profesores";
 
     // ==========================================
     // PROCESAMIENTO
     // ==========================================
     
-    // Leer el cuerpo de la petición (el JSON que envía el JS)
+    // Leer el cuerpo de la peticiÃ³n (el JSON que envÃ­a el JS)
     $inputJSON = file_get_contents('php://input');
     $input = json_decode($inputJSON, true);
 
     if (!isset($input['csv_content'])) {
-        throw new Exception('No se recibió el campo csv_content');
+        throw new Exception('No se recibiÃ³ el campo csv_content');
     }
 
     $csv_content = $input['csv_content'];
@@ -38,7 +33,7 @@ try {
         ]
     ]);
 
-    // Configurar la petición HTTP (Método nativo, sin cURL)
+    // Configurar la peticiÃ³n HTTP (MÃ©todo nativo, sin cURL)
     $options = [
         'http' => [
             'header'  => "Content-Type: application/json\r\n" .
@@ -51,7 +46,7 @@ try {
 
     $context  = stream_context_create($options);
     
-    // Enviar petición
+    // Enviar peticiÃ³n
     $response = file_get_contents($odoo_url, false, $context);
 
     if ($response === FALSE) {

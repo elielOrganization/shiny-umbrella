@@ -1,8 +1,8 @@
 <?php
 /**
- * Controlador para la eliminación de profesores usando el DNI como identificador.
+ * Controlador para la eliminaciÃ³n de profesores usando el DNI como identificador.
  */
-
+require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
 $input = file_get_contents('php://input');
@@ -16,11 +16,11 @@ if (!$dni) {
     exit;
 }
 
-$odoo_url = "http://10.102.7.196:8069/nfc/delete_persona"; 
+$odoo_url = $ODOO_BASE . "/nfc/delete_persona";
 
 /**
  * Enviamos el DNI a Odoo. 
- * Asegúrate de que tu función en Odoo reciba 'dni' en los argumentos.
+ * AsegÃºrate de que tu funciÃ³n en Odoo reciba 'dni' en los argumentos.
  */
 $payload = json_encode([
     "jsonrpc" => "2.0",
