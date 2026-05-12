@@ -23,9 +23,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarLogs();
 });
 
+const LOGS_POR_PAGINA = 10;
+let logsCache = [];
+let logsPagina = 1;
+
 window.switchLogsTab = function (btn) {
     document.querySelectorAll('.logs-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
+    logsPagina = 1;
     cargarLogs(btn.dataset.tipo);
 };
 
@@ -41,37 +46,85 @@ window.cargarLogs = async function (tipo) {
 
     try {
         const res  = await fetch(GLOBALS.URL_GET_LOGS + '?tipo=' + tipo).then(r => r.json());
-        const logs = res.result?.logs || res.result || [];
-
-        if (!logs.length) {
-            body.innerHTML = '<div style="padding:30px;text-align:center;color:#6b7280;">No hay registros recientes.</div>';
-            return;
-        }
-
-        body.innerHTML = logs.map(log => {
-            const esEntrada = (log.tipo || '').toLowerCase().includes('entrada') ||
-                              (log.tipo || '').toLowerCase().includes('in');
-            const badge = esEntrada
-                ? `<span class="log-badge log-entrada"><i class="fa-solid fa-arrow-right-to-bracket"></i> Entrada</span>`
-                : `<span class="log-badge log-salida"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salida</span>`;
-
-            const hora = log.hora || log.timestamp || log.fecha || '—';
-            const horaFormateada = formatearHora(hora);
-
-            return `
-            <div class="table-row table-grid-logs">
-                <div class="text-gray" style="font-size:0.82rem;">${horaFormateada}</div>
-                <div class="student-name">${log.nombre || log.persona || '—'}</div>
-                <div>
-                    <span class="uid-label"><i class="fa-solid fa-rss"></i>${log.uid || '—'}</span>
-                </div>
-                <div class="text-center">${badge}</div>
-            </div>`;
-        }).join('');
-
+        logsCache  = res.result?.fichajes || res.result?.logs || res.result || [];
+        logsPagina = 1;
+        renderizarLogs();
     } catch (e) {
         body.innerHTML = '<div style="padding:20px;text-align:center;color:#ef4444;">Error al cargar registros.</div>';
     }
+};
+
+function limpiarNombre(nombre) {
+    return (nombre || '—').replace(/\s*\(.*?\)\s*/g, '').trim() || '—';
+}
+
+function renderizarLogs() {
+    const body      = document.getElementById('logsTableBody');
+    const total     = logsCache.length;
+    const totalPags = Math.ceil(total / LOGS_POR_PAGINA);
+    const inicio    = (logsPagina - 1) * LOGS_POR_PAGINA;
+    const pagina    = logsCache.slice(inicio, inicio + LOGS_POR_PAGINA);
+
+    if (!total) {
+        body.innerHTML = '<div style="padding:30px;text-align:center;color:#6b7280;">No hay registros recientes.</div>';
+        return;
+    }
+
+    const filas = pagina.map(log => {
+        const movimiento = (log.tipo_movimiento || log.tipo || '').toLowerCase();
+        const esEntrada  = movimiento.includes('entrada') || movimiento.includes('in');
+        const badge = esEntrada
+            ? `<span class="log-badge log-entrada"><i class="fa-solid fa-arrow-right-to-bracket"></i> Entrada</span>`
+            : `<span class="log-badge log-salida"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salida</span>`;
+
+        const hora           = log.fecha_hora || log.hora || log.timestamp || log.fecha || '—';
+        const horaFormateada = formatearHora(hora);
+        const nombre         = limpiarNombre(log.display_name_sujeto || log.nombre || log.persona);
+        const uid            = log.uid_usado || log.uid || '—';
+
+        return `
+        <div class="table-row table-grid-logs">
+            <div class="text-gray" style="font-size:0.82rem;">${horaFormateada}</div>
+            <div class="student-name">${nombre}</div>
+            <div><span class="uid-label"><i class="fa-solid fa-rss"></i>${uid}</span></div>
+            <div class="text-center">${badge}</div>
+        </div>`;
+    }).join('');
+
+    const paginacion = totalPags > 1 ? `
+        <div class="logs-pagination">
+            <button class="logs-page-btn" onclick="cambiarPaginaLogs(-1)" ${logsPagina === 1 ? 'disabled' : ''}>
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="logs-page-info">${logsPagina} / ${totalPags}</span>
+            <button class="logs-page-btn" onclick="cambiarPaginaLogs(1)" ${logsPagina === totalPags ? 'disabled' : ''}>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>` : '';
+
+    body.innerHTML = filas + paginacion;
+}
+
+window.cambiarPaginaLogs = function (dir) {
+    const totalPags = Math.ceil(logsCache.length / LOGS_POR_PAGINA);
+    const body = document.getElementById('logsTableBody');
+
+    body.style.transition = 'opacity 0.12s ease, transform 0.12s ease';
+    body.style.opacity    = '0';
+    body.style.transform  = 'scale(0.97)';
+
+    setTimeout(() => {
+        logsPagina = Math.max(1, Math.min(totalPags, logsPagina + dir));
+        renderizarLogs();
+        body.style.transition = 'none';
+        body.style.transform  = 'scale(1.02)';
+        body.style.opacity    = '0';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            body.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+            body.style.opacity    = '1';
+            body.style.transform  = 'scale(1)';
+        }));
+    }, 120);
 };
 
 function formatearHora(valor) {

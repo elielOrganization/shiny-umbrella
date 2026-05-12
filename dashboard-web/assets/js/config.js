@@ -25,6 +25,7 @@ const GLOBALS = {
     URL_DELETE_CARD: '../controllers/delete_nfc.php',
     URL_UNLINK_CARD: '../controllers/unlink_nfc.php',
 
+    URL_LOOKUP_NFC:      '../controllers/lookup_nfc.php',
     URL_GET_LOGS:        '../controllers/get_logs.php',
     URL_GET_ALUMNOS:     '../controllers/get_alumnos.php',
     URL_GET_PROFESORES: '../controllers/get_profesores.php',
