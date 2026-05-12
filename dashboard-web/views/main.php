@@ -1,0 +1,94 @@
+<?php
+$pageTitle = "Dashboard Escolar";
+include '../includes/header.php';
+include '../includes/sidebar.php';
+?>
+
+<main class="main-content">
+    <div class="controls-row">
+        <h2 class="page-title">Estadísticas</h2>
+    </div>
+
+    <!-- Tarjetas de resumen -->
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-user-group" style="margin-right:6px;color:#3b82f6;"></i>Total Alumnado
+            </div>
+            <div class="card-value" id="statAlumnos">—</div>
+            <div class="card-subtext">Alumnos registrados</div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-rss" style="margin-right:6px;color:#10b981;"></i>Con NFC Vinculada
+            </div>
+            <div class="card-value text-green" id="statConNfc">—</div>
+            <div class="card-subtext">Tarjetas asignadas</div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-circle-exclamation" style="margin-right:6px;color:#ef4444;"></i>Sin NFC
+            </div>
+            <div class="card-value text-red" id="statSinNfc">—</div>
+            <div class="card-subtext">Pendientes de vincular</div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-chalkboard-user" style="margin-right:6px;color:#8b5cf6;"></i>Profesorado
+            </div>
+            <div class="card-value text-blue" id="statProfes">—</div>
+            <div class="card-subtext">Profesores registrados</div>
+        </div>
+    </div>
+
+    <!-- Gráfico distribución por curso -->
+    <div class="chart-container">
+        <div class="section-header">
+            <i class="fa-solid fa-chart-simple" style="font-size:0.9rem;color:#6b7280;margin-right:10px;"></i>
+            Alumnado por Curso
+        </div>
+        <div class="chart-area" id="courseChart">
+            <div class="table-main-loader" id="chartLoader" style="display:flex;align-items:center;gap:10px;padding:20px;">
+                <img src="../assets/img/logo_umbrella.png" class="spinning-umbrella" style="width:30px;margin:0;">
+                <span>Cargando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla gestión rápida de permisos -->
+    <div class="table-container">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:#f8fafc;border-bottom:2px solid #e5e7eb;">
+            <span style="font-weight:700;font-size:1rem;color:#1f2937;">
+                <i class="fa-solid fa-sliders" style="margin-right:8px;color:#6b7280;font-size:0.9rem;"></i>
+                Gestión Rápida de Permisos
+            </span>
+            <div class="search-box" style="max-width:260px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Buscar alumno..." class="search-input" id="mainSearch" style="width:220px;">
+            </div>
+        </div>
+
+        <!-- Cabecera de columnas -->
+        <div class="table-grid-main table-header-row">
+            <div>Alumno/a</div>
+            <div>Grupo</div>
+            <div>NFC</div>
+            <div class="text-center">Recreo</div>
+            <div class="text-center">Salida</div>
+            <div class="text-center">Transporte</div>
+        </div>
+
+        <div id="mainTableBody">
+            <div class="table-main-loader" id="mainTableLoader">
+                <img src="../assets/img/logo_umbrella.png" class="spinning-umbrella">
+                <p>Cargando datos...</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
