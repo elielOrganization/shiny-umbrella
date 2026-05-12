@@ -1,5 +1,6 @@
 @echo off
-set FLAGS=--disable-web-security --user-data-dir="C:\temp\chrome-nfc" --app="file:///C:/Users/vovvi/Desktop/Profesores/app_html/index.html"
+set FILE=%~dp0index.html
+set FLAGS=--disable-web-security --user-data-dir="C:\temp\chrome-nfc" --app="file:///%FILE:\=/%"
 
 where chrome.exe >nul 2>&1
 if %errorlevel%==0 (
