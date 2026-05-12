@@ -1,29 +1,71 @@
 // ui_alumnos.js
 const AlumnosUI = {
+    _allData:   [],
+    _filtered:  [],
+    _page:      1,
+    POR_PAGINA: 10,
+
     renderTable(listaAlumnos) {
-        const tableBody = document.getElementById('tableBody');
         const loader = document.getElementById('tableLoader');
-        if (!tableBody || !loader) return;
+        if (loader) loader.style.display = 'none';
 
-        loader.style.display = 'none';
+        this._allData  = listaAlumnos;
+        this._filtered = listaAlumnos;
+        this._page     = 1;
+        this._renderPagina();
 
-        if (listaAlumnos.length === 0) {
-            tableBody.innerHTML = `<div style="padding:40px; text-align:center;">No hay alumnos registrados.</div>`;
+        if (typeof window.applyFilters === 'function') window.applyFilters();
+    },
+
+    aplicarFiltros(searchTerm, checkedCursos, filterNoNfc, filterTrans, filterMayor, filterMenor) {
+        this._filtered = this._allData.filter(alumno => {
+            const edad     = this.calcularEdad(alumno.fecha_nacimiento);
+            const tieneNFC = !!(alumno.uid && alumno.uid !== '');
+            const curso    = (alumno.grupo_clase || '').trim();
+            const texto    = [
+                alumno.apellido, alumno.nombre,
+                this.formatearFecha(alumno.fecha_nacimiento),
+                curso, alumno.dni || '', alumno.uid || ''
+            ].join(' ').toLowerCase();
+
+            if (searchTerm && !texto.includes(searchTerm))               return false;
+            if (checkedCursos.length > 0 && !checkedCursos.includes(curso)) return false;
+            if (filterNoNfc  && tieneNFC)                                 return false;
+            if (filterTrans  && !alumno.permiso_transporte)               return false;
+            if (filterMayor  && edad < 18)                                return false;
+            if (filterMenor  && edad >= 18)                               return false;
+            return true;
+        });
+        this._page = 1;
+        this._renderPagina();
+    },
+
+    _renderPagina() {
+        const tableBody = document.getElementById('tableBody');
+        if (!tableBody) return;
+
+        const total     = this._filtered.length;
+        const totalPags = Math.max(1, Math.ceil(total / this.POR_PAGINA));
+        const inicio    = (this._page - 1) * this.POR_PAGINA;
+        const pagina    = this._filtered.slice(inicio, inicio + this.POR_PAGINA);
+
+        if (!total) {
+            tableBody.innerHTML = `<div style="padding:40px;text-align:center;">No hay alumnos registrados.</div>`;
             return;
         }
 
         let html = '';
-        listaAlumnos.forEach(alumno => {
-            const dniRaw = alumno.dni || alumno.vat || "";
-            const dniLimpio = (dniRaw === false) ? "" : String(dniRaw).trim();
-            const nombreCompleto = `${alumno.nombre} ${alumno.apellido}`.replace(/'/g, "");
-            const edad = this.calcularEdad(alumno.fecha_nacimiento);
-            const tieneNFC = alumno.uid && alumno.uid !== "";
-            
+        pagina.forEach(alumno => {
+            const dniRaw       = alumno.dni || alumno.vat || '';
+            const dniLimpio    = (dniRaw === false) ? '' : String(dniRaw).trim();
+            const nombreCompleto = `${alumno.nombre} ${alumno.apellido}`.replace(/'/g, '');
+            const edad         = this.calcularEdad(alumno.fecha_nacimiento);
+            const tieneNFC     = !!(alumno.uid && alumno.uid !== '');
+
             html += `
-            <div class="table-row table-grid-layout" 
+            <div class="table-row table-grid-layout"
                 data-curso="${alumno.grupo_clase || ''}"
-                data-nfc="${tieneNFC ? 'yes' : 'no'}" 
+                data-nfc="${tieneNFC ? 'yes' : 'no'}"
                 data-transporte="${alumno.permiso_transporte ? 'yes' : 'no'}"
                 data-es-mayor="${edad >= 18 ? 'yes' : 'no'}">
 
@@ -63,9 +105,9 @@ const AlumnosUI = {
                 </div>
                 <div class="bool-cell">
                     <label class="switch">
-                        <input type="checkbox" 
-                            ${alumno.permiso_transporte ? 'checked' : ''} 
-                            data-dni="${alumno.dni}" 
+                        <input type="checkbox"
+                            ${alumno.permiso_transporte ? 'checked' : ''}
+                            data-dni="${alumno.dni}"
                             data-field="permiso_transporte">
                         <span class="slider round"></span>
                     </label>
@@ -90,26 +132,53 @@ const AlumnosUI = {
             </div>`;
         });
 
-        tableBody.innerHTML = html;
-        console.log("Tabla renderizada, aplicando filtros si existen...");
-        if (typeof window.applyFilters === 'function') {
-            window.applyFilters();
-        }
+        const paginacion = totalPags > 1 ? `
+            <div class="logs-pagination">
+                <button class="logs-page-btn" onclick="AlumnosUI._cambiarPagina(-1)" ${this._page === 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <span class="logs-page-info">${this._page} / ${totalPags}</span>
+                <button class="logs-page-btn" onclick="AlumnosUI._cambiarPagina(1)" ${this._page === totalPags ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>` : '';
+
+        tableBody.innerHTML = html + paginacion;
+    },
+
+    _cambiarPagina(dir) {
+        const totalPags = Math.max(1, Math.ceil(this._filtered.length / this.POR_PAGINA));
+        const body      = document.getElementById('tableBody');
+
+        body.style.transition = 'opacity 0.12s ease, transform 0.12s ease';
+        body.style.opacity    = '0';
+        body.style.transform  = 'scale(0.97)';
+
+        setTimeout(() => {
+            this._page = Math.max(1, Math.min(totalPags, this._page + dir));
+            this._renderPagina();
+            body.style.transition = 'none';
+            body.style.transform  = 'scale(1.02)';
+            body.style.opacity    = '0';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                body.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                body.style.opacity    = '1';
+                body.style.transform  = 'scale(1)';
+            }));
+        }, 120);
     },
 
     showError() {
         const loader = document.getElementById('tableLoader');
-        if (loader) {
-            loader.innerHTML = `<p style="color:red; padding:20px;">Error de sincronización con Odoo.</p>`;
-        }
+        if (loader) loader.innerHTML = `<p style="color:red;padding:20px;">Error de sincronización con Odoo.</p>`;
     },
 
     calcularEdad(fecha) {
         if (!fecha) return 0;
-        const hoy = new Date();
+        const hoy   = new Date();
         const cumple = new Date(fecha);
         let edad = hoy.getFullYear() - cumple.getFullYear();
-        const m = hoy.getMonth() - cumple.getMonth();
+        const m  = hoy.getMonth() - cumple.getMonth();
         if (m < 0 || (m === 0 && hoy.getDate() < cumple.getDate())) edad--;
         return edad;
     },
@@ -120,3 +189,5 @@ const AlumnosUI = {
         return `${d}/${m}/${y}`;
     }
 };
+
+window.AlumnosUI = AlumnosUI;

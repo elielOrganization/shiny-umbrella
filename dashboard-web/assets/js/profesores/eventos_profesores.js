@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnBorrarFiltros) {
         btnBorrarFiltros.addEventListener('click', () => {
             document.querySelectorAll('#filterMenuProf input[type="checkbox"]').forEach(cb => cb.checked = false);
-            document.getElementById('tableSearchProf').value = ''; // Limpiamos buscador
-            
-            document.querySelectorAll('#tableBodyProf .table-row').forEach(fila => fila.style.display = '');
+            const buscador = document.getElementById('tableSearchProf');
+            if (buscador) buscador.value = '';
+            aplicarFiltrosYBusqueda();
             if (panelFiltros) panelFiltros.classList.remove('show');
         });
     }
@@ -238,52 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
         buscadorInput.addEventListener('input', aplicarFiltrosYBusqueda);
     }
 
-    // Función maestra que combina los checkboxes y el buscador
     function aplicarFiltrosYBusqueda() {
-        const buscador = document.getElementById('tableSearchProf');
-        const textoBusqueda = (buscador ? buscador.value : '').toLowerCase();
-        
-        const depsSeleccionados = Array.from(document.querySelectorAll('input[name="filter-dep"]:checked')).map(cb => cb.value);
+        const buscador             = document.getElementById('tableSearchProf');
+        const textoBusqueda        = (buscador ? buscador.value : '').toLowerCase();
+        const depsSeleccionados    = Array.from(document.querySelectorAll('input[name="filter-dep"]:checked')).map(cb => cb.value);
         const estadosSeleccionados = Array.from(document.querySelectorAll('input[name="filter-estado"]:checked')).map(cb => cb.value);
-        const nfcSeleccionados = Array.from(document.querySelectorAll('input[name="filter-nfc"]:checked')).map(cb => cb.value);
+        const nfcSeleccionados     = Array.from(document.querySelectorAll('input[name="filter-nfc"]:checked')).map(cb => cb.value);
 
-        const filas = document.querySelectorAll('#tableBodyProf .table-row');
-
-        // CHIVATO PARA LA CONSOLA (Pulsa F12 en tu navegador)
-        console.log("--- INICIANDO FILTRADO ---");
-        console.log(`Filas encontradas en la tabla: ${filas.length}`);
-        console.log(`Filtros activos -> Dep: [${depsSeleccionados}], Estado: [${estadosSeleccionados}], NFC: [${nfcSeleccionados}]`);
-
-        filas.forEach((fila, index) => {
-            // Leer las etiquetas ocultas
-            const depFila = fila.getAttribute('data-dep') || '';
-            const estadoFila = fila.getAttribute('data-estado') || '';
-            const nfcFila = fila.getAttribute('data-nfc') || '';
-            
-            // Leer el texto del nombre/apellidos para buscar
-            const nombreNodo = fila.querySelector('.student-name');
-            const nombreCompleto = nombreNodo ? nombreNodo.textContent.toLowerCase() : '';
-
-            // Comprobar condiciones
-            const pasaBusqueda = textoBusqueda === '' || nombreCompleto.includes(textoBusqueda);
-            const pasaDep = depsSeleccionados.length === 0 || depsSeleccionados.includes(depFila);
-            const pasaEstado = estadosSeleccionados.length === 0 || estadosSeleccionados.includes(estadoFila);
-            const pasaNfc = nfcSeleccionados.length === 0 || nfcSeleccionados.includes(nfcFila);
-
-            // Si pasa TODO, se muestra
-            if (pasaBusqueda && pasaDep && pasaEstado && pasaNfc) {
-                // Borramos la orden de ocultar para que recupere su grid/flex original
-                fila.style.display = ''; 
-            } else {
-                // ¡Aplastamos al CSS obligando a que se oculte sí o sí!
-                fila.style.setProperty('display', 'none', 'important'); 
-            }
-
-            // Chivato de la primera fila para asegurarnos de que está leyendo bien
-            if (index === 0) {
-                console.log(`Fila 1 detectada -> Nombre: ${nombreCompleto}, Dep: ${depFila}, Estado: ${estadoFila}, NFC: ${nfcFila}`);
-            }
-        });
-        console.log("--- FIN DEL FILTRADO ---");
+        UI_Profesores.aplicarFiltros(textoBusqueda, depsSeleccionados, estadosSeleccionados, nfcSeleccionados);
     }
     });
