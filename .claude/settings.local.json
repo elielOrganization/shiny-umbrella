@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Users\\\\diego\\\\OneDrive\\\\Documentos\\\\GitHub\\\\shiny-umbrella\" branch -a)",
+      "Bash(git -C \"C:\\\\Users\\\\diego\\\\OneDrive\\\\Documentos\\\\GitHub\\\\shiny-umbrella\" show origin/#1-dashboard:dashboard-web/)",
+      "Bash(git -C \"C:\\\\Users\\\\diego\\\\OneDrive\\\\Documentos\\\\GitHub\\\\shiny-umbrella\" ls-tree origin/#1-dashboard --name-only)",
+      "Bash(git -C \"C:\\\\Users\\\\diego\\\\OneDrive\\\\Documentos\\\\GitHub\\\\shiny-umbrella\" checkout \"#1-dashboard\")",
+      "Bash(git -C \"C:\\\\Users\\\\diego\\\\OneDrive\\\\Documentos\\\\GitHub\\\\shiny-umbrella\" checkout -b \"#1-dashboard\" origin/#1-dashboard)"
+    ]
+  }
+}

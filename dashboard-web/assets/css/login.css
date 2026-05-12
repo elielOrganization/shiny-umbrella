@@ -1,0 +1,176 @@
+:root {
+    --primary-blue: #3b82f6;
+    --primary-hover: #2563eb;
+    --bg-color: #f8fafc;
+    --text-dark: #1f2937;
+    --text-gray: #6b7280;
+    --border-color: #e5e7eb;
+    --danger-red: #ef4444;
+    --danger-bg: #fee2e2;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* --- LOGO Y ANIMACIÓN --- */
+.logo-area {
+    margin-bottom: 20px;
+    height: 120px; /* Espacio reservado fijo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+/* Clase para girar el logo */
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- INPUTS --- */
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.password-group {
+    position: relative; /* Para posicionar el ojo */
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    color: var(--text-dark);
+    background: #fff;
+}
+
+.input-field:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Icono Ojo (Mostrar contraseña) */
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-gray);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.toggle-password:hover {
+    color: var(--primary-blue);
+}
+
+/* --- OPCIONES Y BOTÓN --- */
+.options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    font-size: 0.85rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-gray);
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-login {
+    width: 100%;
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-login:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+}
+
+/* --- CAJA DE ERROR --- */
+.error-box {
+    margin-top: 15px;
+    background-color: var(--danger-bg);
+    color: var(--danger-red);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: none; /* Oculto por defecto */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #fecaca;
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Pequeña animación de sacudida para el error */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
