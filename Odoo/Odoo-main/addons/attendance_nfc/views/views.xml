@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_nfc_card_list" model="ir.ui.view">
+        <field name="name">nfc.card.list</field>
+        <field name="model">nfc.card</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="uid"/>
+                <field name="activo"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_nfc_profesor_list" model="ir.ui.view">
+        <field name="name">nfc.profesor.list</field>
+        <field name="model">nfc.profesor</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="nombre"/>
+                <field name="apellido"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_nfc_alumno_list" model="ir.ui.view">
+        <field name="name">nfc.alumno.list</field>
+        <field name="model">nfc.alumno</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="nombre"/>
+                <field name="apellido"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_nfc_card" model="ir.actions.act_window">
+        <field name="name">Tarjetas NFC</field>
+        <field name="res_model">nfc.card</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_nfc_alumno" model="ir.actions.act_window">
+        <field name="name">Alumnos</field>
+        <field name="res_model">nfc.alumno</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+     <record id="action_nfc_profesor" model="ir.actions.act_window">
+        <field name="name">Profesores</field>
+        <field name="res_model">nfc.profesor</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_nfc_root" name="Asistencia NFC" sequence="10"/>
+    <menuitem id="menu_nfc_cards" name="Tarjetas" parent="menu_nfc_root" action="action_nfc_card" sequence="10"/>
+    <menuitem id="menu_nfc_alumnos" name="Alumnos" parent="menu_nfc_root" action="action_nfc_alumno" sequence="20"/>
+    <menuitem id="menu_nfc_profesores" name="Profesores" parent="menu_nfc_root" action="action_nfc_profesor" sequence="30"/>
+</odoo>
