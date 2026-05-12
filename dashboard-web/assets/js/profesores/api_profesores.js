@@ -72,7 +72,7 @@ window.API_Profesores = {
         const response = await fetch(GLOBALS.URL_UPDATE_ESTADO, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dni: dni, estado: estado })
+            body: JSON.stringify({ dni: dni, valor: estado })
         });
         const data = await response.json();
         this._validarErrores(data);

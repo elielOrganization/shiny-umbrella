@@ -1,132 +1,148 @@
-// nfc.js
+// profesores/nfc.js
+
+window.activeProfDni = null;
+
+window.prepararAsignacionNFCProf = function(btn) {
+    const dni    = btn.getAttribute('data-dni');
+    const nombre = btn.getAttribute('data-nombre');
+
+    if (!dni || dni === '' || dni === 'false') {
+        alert('Este profesor no tiene DNI asignado en Odoo.');
+        return;
+    }
+
+    window.activeProfDni = dni;
+
+    const modal      = document.getElementById('modalNfcProfesores');
+    const nfcInput   = document.getElementById('nfcInputProfesores');
+    const nfcName    = document.getElementById('nfcProfName');
+    const imgStatus  = document.getElementById('imgStatusNfcProf');
+    const iconWait   = document.getElementById('iconWaitingProf');
+    const nfcMsg     = document.getElementById('nfcStatusMsgProfesores');
+
+    if (!modal || !nfcInput) return;
+
+    nfcName.textContent  = nombre;
+    nfcInput.value       = '';
+    if (iconWait)  { iconWait.style.display = 'block'; }
+    if (imgStatus) { imgStatus.style.display = 'none'; imgStatus.classList.remove('spinning-umbrella'); }
+    if (nfcMsg)    { nfcMsg.className = ''; nfcMsg.innerHTML = '<small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>'; }
+
+    modal.classList.add('show');
+    setTimeout(() => nfcInput.focus(), 400);
+};
+
+window.confirmarDesvincularNFCProf = function(uid, nombre) {
+    window._unlinkUidProf = uid;
+    const modal  = document.getElementById('unlinkNfcProfModal');
+    const nameEl = document.getElementById('unlinkNfcProfNombre');
+    if (nameEl) nameEl.textContent = nombre;
+    if (modal)  modal.classList.add('show');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    let lastScannedCode = "";      
-    let currentStudentDni = "";    
+    // --- DESVINCULAR NFC PROFESOR ---
+    const unlinkModal   = document.getElementById('unlinkNfcProfModal');
+    const btnCancelUnlinkProf  = document.getElementById('btnCancelUnlinkProf');
+    const btnConfirmUnlinkProf = document.getElementById('btnConfirmUnlinkProf');
 
-    const nfcModal = document.getElementById('nfcModal');
-    const nfcInput = document.getElementById('nfcInput');
-    const nfcContent = document.getElementById('nfcContent');
-    const nfcProcessing = document.getElementById('nfcProcessing');
-    const nfcStatusLogo = document.getElementById('nfcStatusLogo');
-    const nfcStatusText = document.getElementById('nfcStatusText');
-    const overwriteModal = document.getElementById('nfcOverwriteModal');
-    const oldScanValueSpan = document.getElementById('oldScanValue');
-    const newScanValueSpan = document.getElementById('newScanValue');
-
-    document.addEventListener('click', (e) => {
-        if (e.target.matches('.btn-vincular')) {
-            currentStudentDni = e.target.getAttribute('data-dni'); 
-            if (!currentStudentDni) return alert("Error: Este botón no tiene un DNI asignado.");
-            resetNfcModal();
-            nfcModal.classList.add('show');
-            setTimeout(() => nfcInput.focus(), 200);
-        }
-    });
-
-    if (nfcInput) {
-        nfcInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const formattedValue = nfcInput.value.trim().replace(/[^a-zA-Z0-9]/g, '');
-
-                if (!formattedValue) {
-                    nfcInput.style.borderColor = "var(--danger-red)";
-                    shakeModal(nfcModal.querySelector('.modal-card'));
-                    nfcInput.value = ""; 
-                    return;
-                }
-
-                if (lastScannedCode !== "" && lastScannedCode !== formattedValue) {
-                    if(oldScanValueSpan) oldScanValueSpan.textContent = lastScannedCode;
-                    if(newScanValueSpan) newScanValueSpan.textContent = formattedValue;
-                    if(overwriteModal) overwriteModal.classList.add('show');
-                } else {
-                    confirmLocalScan(formattedValue);
-                }
-            }
-        });
-        nfcInput.addEventListener('focus', () => nfcInput.select());
-    }
-
-    document.getElementById('btnConfirmOverwrite')?.addEventListener('click', () => {
-        confirmLocalScan(newScanValueSpan.textContent);
-        overwriteModal.classList.remove('show');
-        nfcInput.focus();
-    });
-
-    document.getElementById('btnCancelOverwrite')?.addEventListener('click', () => {
-        overwriteModal.classList.remove('show');
-        nfcInput.value = lastScannedCode;
-        nfcInput.focus();
-    });
-
-    function confirmLocalScan(val) {
-        if(!nfcInput) return;
-        lastScannedCode = val;
-        nfcInput.value = val;
-        nfcInput.style.borderColor = "var(--success-green)";
-        nfcInput.style.boxShadow = "0 0 0 3px rgba(16, 185, 129, 0.1)";
-        nfcInput.select(); 
-    }
-
-    document.getElementById('btnSaveNfc')?.addEventListener('click', () => {
-        if(!nfcInput) return;
-        const idValue = nfcInput.value.trim();
-        if (idValue === "") {
-            nfcInput.style.borderColor = "var(--danger-red)";
-            shakeModal(nfcModal.querySelector('.modal-card'));
-            return;
-        }
-        processNfcSave(idValue);
-    });
-
-    function processNfcSave(idValue) {
-        if(!nfcContent || !nfcProcessing) return;
-        
-        nfcContent.style.display = 'none';
-        nfcProcessing.style.display = 'flex';
-        
-        if(nfcStatusLogo) { nfcStatusLogo.src = GLOBALS.IMG_LOADING; nfcStatusLogo.classList.add('spinning'); }
-        if(nfcStatusText) { nfcStatusText.textContent = "Vinculando tarjeta en Odoo..."; nfcStatusText.className = 'status-text'; }
-
-        fetch(GLOBALS.URL_ASSIGN_CARD, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: idValue, dni: currentStudentDni })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            if(nfcStatusLogo) nfcStatusLogo.classList.remove('spinning');
-            if (data.result) {
-                if(nfcStatusLogo) nfcStatusLogo.src = GLOBALS.IMG_SUCCESS;
-                if(nfcStatusText) { nfcStatusText.textContent = "¡Tarjeta vinculada!"; nfcStatusText.classList.add('success'); }
-                setTimeout(() => nfcModal.classList.remove('show'), 1500);
-            } else {
-                throw new Error(data.error ? data.error.data.message : "Error desconocido al asignar.");
-            }
-        })
-        .catch(error => {
-            if(nfcStatusLogo) { nfcStatusLogo.src = GLOBALS.IMG_ERROR; nfcStatusLogo.classList.remove('spinning');}
-            if(nfcStatusText) { nfcStatusText.textContent = "Error: " + error.message; nfcStatusText.classList.add('error'); }
-            shakeModal(nfcModal.querySelector('.modal-card'));
-            setTimeout(() => { 
-                nfcProcessing.style.display = 'none'; 
-                nfcContent.style.display = 'block'; 
-                nfcInput.focus(); nfcInput.select();
-            }, 2500);
+    if (btnCancelUnlinkProf) {
+        btnCancelUnlinkProf.addEventListener('click', () => {
+            unlinkModal.classList.remove('show');
+            window._unlinkUidProf = null;
         });
     }
 
-    function resetNfcModal() {
-        if (!nfcContent || !nfcInput) return;
-        nfcContent.style.display = 'block';
-        if(nfcProcessing) nfcProcessing.style.display = 'none';
-        nfcInput.value = '';
-        nfcInput.style.borderColor = '#d1d5db';
-        nfcInput.style.boxShadow = "none";
-        lastScannedCode = "";
+    if (btnConfirmUnlinkProf) {
+        btnConfirmUnlinkProf.addEventListener('click', async () => {
+            if (!window._unlinkUidProf) return;
+            const originalText = btnConfirmUnlinkProf.innerHTML;
+            btnConfirmUnlinkProf.disabled = true;
+            btnConfirmUnlinkProf.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Desvinculando...';
+
+            try {
+                const res = await fetch(GLOBALS.URL_UNLINK_CARD, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid: window._unlinkUidProf })
+                }).then(r => r.json());
+
+                if (res.error) throw new Error(res.error.message || 'Error al desvincular');
+                unlinkModal.classList.remove('show');
+                if (typeof window.fetchProfesores === 'function') window.fetchProfesores();
+            } catch (err) {
+                alert('Error al desvincular: ' + err.message);
+            } finally {
+                btnConfirmUnlinkProf.disabled = false;
+                btnConfirmUnlinkProf.innerHTML = originalText;
+                window._unlinkUidProf = null;
+            }
+        });
     }
+
+    const nfcInput  = document.getElementById('nfcInputProfesores');
+    const nfcMsg    = document.getElementById('nfcStatusMsgProfesores');
+    const imgStatus = document.getElementById('imgStatusNfcProf');
+    const iconWait  = document.getElementById('iconWaitingProf');
+
+    if (!nfcInput) return;
+
+    const modalBox = document.querySelector('#modalNfcProfesores .modal-box-vincular');
+    const setColor = c => { if (modalBox) modalBox.style.borderTopColor = c; };
+
+    nfcInput.addEventListener('keydown', async (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+
+        const uid = nfcInput.value.trim();
+        const dni = window.activeProfDni;
+        if (!uid || !dni) return;
+
+        iconWait.style.display  = 'none';
+        imgStatus.src           = '../assets/img/logo_umbrella.png';
+        imgStatus.style.display = 'block';
+        imgStatus.classList.add('spinning-umbrella');
+        nfcMsg.className        = '';
+        nfcMsg.innerHTML        = 'Consultando con Odoo...';
+        setColor('#3b82f6');
+
+        try {
+            const res = await fetch(GLOBALS.URL_ASSIGN_CARD, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ uid, dni })
+            }).then(r => r.json());
+
+            if (res.status === 'error') throw new Error(res.message || 'Error al vincular');
+
+            imgStatus.classList.remove('spinning-umbrella');
+            imgStatus.src    = '../assets/img/logo_umbrella_success.png';
+            nfcMsg.className = 'msg-success';
+            nfcMsg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${res.message || 'Vinculado con éxito'}`;
+            setColor('#10b981');
+
+            setTimeout(() => {
+                document.getElementById('modalNfcProfesores').classList.remove('show');
+                if (typeof window.fetchProfesores === 'function') window.fetchProfesores();
+            }, 2000);
+
+        } catch (err) {
+            imgStatus.classList.remove('spinning-umbrella');
+            imgStatus.src    = '../assets/img/logo_umbrella_error.png';
+            nfcMsg.className = 'msg-error';
+            nfcMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${err.message}`;
+            setColor('#ef4444');
+
+            setTimeout(() => {
+                if (!document.getElementById('modalNfcProfesores').classList.contains('show')) return;
+                nfcInput.value          = '';
+                imgStatus.style.display = 'none';
+                iconWait.style.display  = 'block';
+                nfcMsg.className        = '';
+                nfcMsg.innerHTML        = '<small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>';
+                setColor('#3b82f6');
+                nfcInput.focus();
+            }, 4000);
+        }
+    });
 });

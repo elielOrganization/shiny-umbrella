@@ -17,41 +17,86 @@
 }
 
 body {
-    background-color: var(--bg-color);
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+    overflow: hidden;
+    position: relative;
+}
+
+#bgCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
 }
 
 .login-card {
     background: white;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    padding: 44px 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.12), 0 4px 16px rgba(0,0,0,0.06);
     width: 100%;
-    max-width: 380px;
+    max-width: 390px;
     text-align: center;
-    border: 1px solid var(--border-color);
+    border: 1px solid #e0e7ff;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+/* --- MARCA --- */
+.login-brand {
+    margin-bottom: 4px;
+}
+
+.login-brand-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* --- LOGO Y ANIMACIÓN --- */
 .logo-area {
-    margin-bottom: 20px;
-    height: 120px; /* Espacio reservado fijo */
+    height: 110px;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 0;
 }
 
 .logo-img {
     width: 100px;
     height: 100px;
     object-fit: contain;
-    transition: transform 0.3s ease;
+    animation: slowSpin 12s linear infinite;
+}
+
+@keyframes slowSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.logo-shake {
+    animation: logoShake 0.5s ease forwards, slowSpin 12s linear 0.5s infinite;
+}
+
+@keyframes logoShake {
+    0%   { transform: rotate(0deg)   translateX(0); }
+    15%  { transform: rotate(-8deg)  translateX(-6px); }
+    30%  { transform: rotate(8deg)   translateX(6px); }
+    45%  { transform: rotate(-6deg)  translateX(-4px); }
+    60%  { transform: rotate(6deg)   translateX(4px); }
+    75%  { transform: rotate(-3deg)  translateX(-2px); }
+    90%  { transform: rotate(3deg)   translateX(2px); }
+    100% { transform: rotate(0deg)   translateX(0); }
 }
 
 /* Clase para girar el logo */
@@ -153,19 +198,23 @@ body {
 
 /* --- CAJA DE ERROR --- */
 .error-box {
-    margin-top: 15px;
     background-color: var(--danger-bg);
     color: var(--danger-red);
-    padding: 10px;
+    padding: 8px 10px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    display: none; /* Oculto por defecto */
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     border: 1px solid #fecaca;
-    animation: shake 0.3s ease-in-out;
+    visibility: hidden;
+    margin-top: -6px;
+}
+
+.error-box.error-visible {
+    visibility: visible;
 }
 
 /* Pequeña animación de sacudida para el error */

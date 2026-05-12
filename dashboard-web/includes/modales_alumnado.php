@@ -198,80 +198,23 @@
     </div>
 </div>
 
-<!-- <div id="nfcModal" class="modal-overlay">
-    <div class="modal-card">
-        <span class="close-modal close-nfc">&times;</span>
-        <h3 class="modal-title">Vincular Tarjeta NFC</h3>
-        <p class="modal-subtitle">Acerca la tarjeta al lector o introduce el ID manualmente.</p>
-        <div class="nfc-input-area" id="nfcContent">
-            <div class="nfc-icon-container">
-                <i class="fa-solid fa-wifi nfc-wave"></i>
-                <i class="fa-solid fa-address-card nfc-card"></i>
-            </div>
-            <div class="input-group" style="text-align: left; margin-top: 20px;">
-                <label style="font-size: 0.85rem; font-weight: 600; color: #374151;">NFC ID</label>
-                <input type="text" id="nfcInput" class="input-field" placeholder="Ej: E4:55:A1:09" style="margin-top: 5px;">
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" id="btnCancelNfc">Cancelar</button>
-                <button class="btn-primary" id="btnSaveNfc" style="width: auto; justify-content: center;">Guardar</button>
-            </div>
+<!-- Modal NFC antiguo (reemplazado por modalNfcAlumnos) -->
+
+<div id="deleteConfirmModal" class="modal-overlay-custom">
+    <div class="modal-box-custom modal-box-delete">
+        <div class="modal-icon-circle" style="background:#fef2f2;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i>
         </div>
-        <div class="processing-area" id="nfcProcessing" style="display: none;">
-            <img src="../src/img/logo_umbrella.png" alt="Procesando" class="spinner-img" id="nfcStatusLogo">
-            <p class="status-text" id="nfcStatusText">Vinculando tarjeta...</p>
+        <div class="modal-title"><h3>¿Estás seguro?</h3></div>
+        <div class="modal-body">
+            <p>Esta acción eliminará permanentemente al alumno <strong id="deleteAlumnoName" style="color:#ef4444;"></strong> de la base de datos de Odoo.</p>
+        </div>
+        <div class="modal-actions-row">
+            <button id="btnCancelDelete" class="btn-modal-base btn-modal-cancel">Cancelar</button>
+            <button id="btnConfirmDelete" class="btn-modal-base btn-modal-delete">Eliminar Alumno</button>
         </div>
     </div>
 </div>
-
-<div id="nfcConflictModal" class="modal-overlay" style="z-index: 1100;">
-    <div class="modal-card">
-        <div style="color: #f59e0b; font-size: 3rem; margin-bottom: 10px;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <h3 class="modal-title">Tarjeta ya asignada</h3>
-        <p class="modal-subtitle">
-            El ID <span id="conflictID" class="text-mono" style="font-weight:bold;"></span> ya pertenece a un alumno.
-            <br>¿Deseas desvincularla y asignar esta tarjeta al alumno actual?
-        </p>
-        <div class="modal-actions" style="justify-content: center; gap: 15px;">
-            <button class="btn-cancel" id="btnCancelReplace">Cancelar</button>
-            <button class="btn-primary" id="btnConfirmReplace" style="background-color: #f59e0b; border: none;">Sí, Reemplazar</button>
-        </div>
-    </div>
-</div>
-
-<div id="nfcOverwriteModal" class="modal-overlay" style="z-index: 1200;">
-    <div class="modal-card">
-        <div style="color: #3b82f6; font-size: 3rem; margin-bottom: 10px;">
-            <i class="fa-solid fa-rotate"></i>
-        </div>
-        <h3 class="modal-title">¿Reemplazar escaneo?</h3>
-        <p class="modal-subtitle">
-            Ya tienes el código <span id="oldScanValue" class="text-mono" style="text-decoration: line-through;"></span>.
-            <br>¿Quieres sustituirlo por el nuevo escaneo <span id="newScanValue" class="text-mono" style="color:#3b82f6;"></span>?
-        </p>
-        <div class="modal-actions" style="justify-content: center; gap: 15px;">
-            <button class="btn-cancel" id="btnCancelOverwrite">Mantener anterior</button>
-            <button class="btn-primary" id="btnConfirmOverwrite">Sustituir</button>
-        </div>
-    </div>
-</div>
-
-<div id="deleteConfirmModal" class="modal-overlay">
-    <div class="modal-card modal-confirm">
-        <div class="confirm-icon">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <h3 class="modal-title">¿Estás seguro?</h3>
-        <p class="modal-subtitle">Esta acción eliminará permanentemente al alumno <strong id="deleteAlumnoName"></strong> de la base de datos de Odoo.</p>
-        
-        <div class="confirm-actions">
-            <button id="btnCancelDelete" class="btn-secondary">Cancelar</button>
-            <button id="btnConfirmDelete" class="btn-danger">Eliminar Alumno</button>
-        </div>
-    </div>
-</div> -->
 
 <div id="editAlumnoModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 600px;">
@@ -350,6 +293,22 @@
 
         <div id="nfcStatusMsgAlumnos" style="margin-top: 20px; font-weight: bold; min-height: 40px;">
             <small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>
+        </div>
+    </div>
+</div>
+
+<div id="unlinkNfcAlumnoModal" class="modal-overlay-custom">
+    <div class="modal-box-custom modal-box-unlink">
+        <div class="modal-icon-circle" style="background:#fef3c7;">
+            <i class="fa-solid fa-link-slash" style="color:#d97706;"></i>
+        </div>
+        <div class="modal-title"><h3>¿Desvincular NFC?</h3></div>
+        <div class="modal-body">
+            <p>Se desvinculará la tarjeta de <strong id="unlinkNfcAlumnoNombre" style="color:#d97706;"></strong>. La tarjeta permanecerá en el sistema.</p>
+        </div>
+        <div class="modal-actions-row">
+            <button id="btnCancelUnlinkAlumno" class="btn-modal-base btn-modal-cancel">Cancelar</button>
+            <button id="btnConfirmUnlinkAlumno" class="btn-modal-base btn-modal-unlink">Desvincular</button>
         </div>
     </div>
 </div>

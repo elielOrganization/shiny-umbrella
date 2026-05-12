@@ -125,17 +125,83 @@
     </div>
 </div>
 
-<div id="deleteConfirmModal" class="modal-overlay">
-    <div class="modal-card modal-confirm">
-        <div class="confirm-icon">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+<div id="deleteConfirmModal" class="modal-overlay-custom">
+    <div class="modal-box-custom modal-box-delete">
+        <div class="modal-icon-circle" style="background:#fef2f2;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i>
         </div>
-        <h3 class="modal-title">¿Estás seguro?</h3>
-        <p class="modal-subtitle">Esta acción eliminará permanentemente al profesor <strong id="deleteProfName"></strong> de la base de datos de Odoo.</p>
-        
-        <div class="confirm-actions">
-            <button type="button" class="btn-cancel" id="btnCancelDeleteProf">Cancelar</button>
-            <button type="button" class="btn-primary" id="btnConfirmDeleteProf" style="background-color: #ef4444;">Eliminar Profesor</button>
+        <div class="modal-title"><h3>¿Estás seguro?</h3></div>
+        <div class="modal-body">
+            <p>Esta acción eliminará permanentemente al profesor <strong id="deleteProfName" style="color:#ef4444;"></strong> de la base de datos de Odoo.</p>
+        </div>
+        <div class="modal-actions-row">
+            <button type="button" class="btn-modal-base btn-modal-cancel" id="btnCancelDeleteProf">Cancelar</button>
+            <button type="button" class="btn-modal-base btn-modal-delete" id="btnConfirmDeleteProf">Eliminar Profesor</button>
+        </div>
+    </div>
+</div>
+
+<div id="unlinkNfcProfModal" class="modal-overlay-custom">
+    <div class="modal-box-custom modal-box-unlink">
+        <div class="modal-icon-circle" style="background:#fef3c7;">
+            <i class="fa-solid fa-link-slash" style="color:#d97706;"></i>
+        </div>
+        <div class="modal-title"><h3>¿Desvincular NFC?</h3></div>
+        <div class="modal-body">
+            <p>Se desvinculará la tarjeta de <strong id="unlinkNfcProfNombre" style="color:#d97706;"></strong>. La tarjeta permanecerá en el sistema.</p>
+        </div>
+        <div class="modal-actions-row">
+            <button id="btnCancelUnlinkProf" class="btn-modal-base btn-modal-cancel">Cancelar</button>
+            <button id="btnConfirmUnlinkProf" class="btn-modal-base btn-modal-unlink">Desvincular</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.nfc-icon-container {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.pulse-nfc-icon {
+    font-size: 4rem;
+    color: #3b82f6;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%   { transform: scale(1);   opacity: 1; }
+    50%  { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1);   opacity: 1; }
+}
+.status-img-nfc { width: 85px; display: none; }
+.msg-success { color: #10b981; }
+.msg-error   { color: #ef4444; }
+.spinning-umbrella { animation: rotateUmbrella 2s linear infinite; }
+@keyframes rotateUmbrella {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+</style>
+
+<div id="modalNfcProfesores" class="modal-overlay-custom">
+    <div class="modal-box-vincular">
+        <span class="close-modal-btn" onclick="document.getElementById('modalNfcProfesores').classList.remove('show')">&times;</span>
+
+        <div class="nfc-icon-container">
+            <i id="iconWaitingProf" class="fa-solid fa-rss pulse-nfc-icon"></i>
+            <img id="imgStatusNfcProf" src="../assets/img/logo_umbrella.png" class="status-img-nfc" alt="Status" style="display:none;">
+        </div>
+
+        <h3>Vinculando NFC</h3>
+        <p style="color:#64748b; margin-bottom:5px;">Profesor:</p>
+        <p><strong id="nfcProfName" style="color:#3b82f6; font-size:1.2rem;"></strong></p>
+
+        <input type="text" id="nfcInputProfesores" style="position:absolute; opacity:0; pointer-events:none;">
+
+        <div id="nfcStatusMsgProfesores" style="margin-top:20px; font-weight:bold; min-height:40px;">
+            <small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>
         </div>
     </div>
 </div>

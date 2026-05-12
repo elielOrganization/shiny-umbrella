@@ -33,10 +33,15 @@ const AlumnosUI = {
                 <div class="text-gray">${alumno.dni || 'N/A'}</div>
 
                 <div>
-                    ${tieneNFC 
-                        ? `<span class="uid-label"><i class="fa-solid fa-rss"></i>${alumno.uid}</span>`
-                        : `<button class="btn-vincular"  
-                            data-dni="${dniLimpio}" 
+                    ${tieneNFC
+                        ? `<span class="uid-label nfc-tag-wrapper">
+                            <i class="fa-solid fa-rss"></i>${alumno.uid}
+                            <button class="btn-unlink-nfc" onclick="confirmarDesvincularNFC('${alumno.uid}', '${alumno.nombre} ${alumno.apellido}')" title="Desvincular NFC">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                           </span>`
+                        : `<button class="btn-vincular"
+                            data-dni="${dniLimpio}"
                             data-nombre="${nombreCompleto}"
                             onclick="prepararAsignacionNFC(this)">
                             Vincular
@@ -77,7 +82,7 @@ const AlumnosUI = {
                         onclick="prepararEdicionAlumno(this)">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button class="btn-table-action delete" 
+                    <button class="btn-table-action delete"
                         onclick="confirmarEliminarAlumno('${alumno.dni}', '${alumno.nombre} ${alumno.apellido}')">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>

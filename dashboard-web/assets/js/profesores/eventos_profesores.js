@@ -90,6 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 4. EVENTOS: ELIMINAR ---
+    const deleteModal = document.getElementById('deleteConfirmModal');
+
+    document.getElementById('btnCancelDeleteProf')?.addEventListener('click', () => UI_Profesores.cerrarModalEliminar());
+    deleteModal?.addEventListener('click', (e) => { if (e.target === deleteModal) UI_Profesores.cerrarModalEliminar(); });
+
     const btnConfirmarEliminar = document.getElementById('btnConfirmDeleteProf');
     if (btnConfirmarEliminar) {
         btnConfirmarEliminar.addEventListener('click', async function() {

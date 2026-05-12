@@ -15,15 +15,71 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         actualizarStats(alumnos, profes);
         renderizarGrafico(alumnos);
-        renderizarTabla(alumnos);
-        configurarBuscador();
 
     } catch (e) {
-        console.error('Error cargando dashboard:', e);
-        document.getElementById('mainTableLoader').innerHTML =
-            '<p style="color:#ef4444;padding:20px;">Error de sincronización con Odoo.</p>';
+        console.error('Error cargando stats:', e);
     }
+
+    cargarLogs();
 });
+
+window.switchLogsTab = function (btn) {
+    document.querySelectorAll('.logs-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    cargarLogs(btn.dataset.tipo);
+};
+
+window.cargarLogs = async function (tipo) {
+    if (!tipo) {
+        const active = document.querySelector('.logs-tab.active');
+        tipo = active ? active.dataset.tipo : 'profesor';
+    }
+
+    const body   = document.getElementById('logsTableBody');
+    const loader = document.getElementById('logsLoader');
+    if (loader) loader.style.display = '';
+
+    try {
+        const res  = await fetch(GLOBALS.URL_GET_LOGS + '?tipo=' + tipo).then(r => r.json());
+        const logs = res.result?.logs || res.result || [];
+
+        if (!logs.length) {
+            body.innerHTML = '<div style="padding:30px;text-align:center;color:#6b7280;">No hay registros recientes.</div>';
+            return;
+        }
+
+        body.innerHTML = logs.map(log => {
+            const esEntrada = (log.tipo || '').toLowerCase().includes('entrada') ||
+                              (log.tipo || '').toLowerCase().includes('in');
+            const badge = esEntrada
+                ? `<span class="log-badge log-entrada"><i class="fa-solid fa-arrow-right-to-bracket"></i> Entrada</span>`
+                : `<span class="log-badge log-salida"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salida</span>`;
+
+            const hora = log.hora || log.timestamp || log.fecha || '—';
+            const horaFormateada = formatearHora(hora);
+
+            return `
+            <div class="table-row table-grid-logs">
+                <div class="text-gray" style="font-size:0.82rem;">${horaFormateada}</div>
+                <div class="student-name">${log.nombre || log.persona || '—'}</div>
+                <div>
+                    <span class="uid-label"><i class="fa-solid fa-rss"></i>${log.uid || '—'}</span>
+                </div>
+                <div class="text-center">${badge}</div>
+            </div>`;
+        }).join('');
+
+    } catch (e) {
+        body.innerHTML = '<div style="padding:20px;text-align:center;color:#ef4444;">Error al cargar registros.</div>';
+    }
+};
+
+function formatearHora(valor) {
+    if (!valor) return '—';
+    const d = new Date(valor);
+    if (isNaN(d)) return valor;
+    return d.toLocaleString('es-ES', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
 
 function actualizarStats(alumnos, profes) {
     const conNfc = alumnos.filter(a => a.uid && a.uid !== '').length;
@@ -59,82 +115,3 @@ function renderizarGrafico(alumnos) {
     }).join('');
 }
 
-function renderizarTabla(alumnos) {
-    const body = document.getElementById('mainTableBody');
-
-    if (!alumnos.length) {
-        body.innerHTML = '<div style="padding:30px;text-align:center;color:#6b7280;">No hay alumnos registrados.</div>';
-        return;
-    }
-
-    const sorted = [...alumnos].sort((a, b) => {
-        const ga = a.grupo_clase || '';
-        const gb = b.grupo_clase || '';
-        if (ga !== gb) return ga.localeCompare(gb);
-        return (a.apellido || '').localeCompare(b.apellido || '');
-    });
-
-    let html = '';
-    sorted.forEach(alumno => {
-        const tieneNfc  = alumno.uid && alumno.uid !== '';
-        const nombreKey = `${alumno.nombre || ''} ${alumno.apellido || ''}`.toLowerCase();
-
-        html += `
-        <div class="table-row table-grid-main" data-nombre="${nombreKey}">
-            <div class="student-name">${alumno.apellido || ''}, ${alumno.nombre || ''}</div>
-            <div class="text-gray">${alumno.grupo_clase || 'S/G'}</div>
-            <div>
-                ${tieneNfc
-                    ? `<span class="uid-label"><i class="fa-solid fa-rss"></i>${alumno.uid}</span>`
-                    : `<span style="color:#9ca3af;font-size:0.8rem;font-style:italic;">Sin tarjeta</span>`
-                }
-            </div>
-            <div class="bool-cell campo-calculado">
-                <label class="switch">
-                    <input type="checkbox" ${alumno.permiso_recreo ? 'checked' : ''} disabled>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="bool-cell campo-calculado">
-                <label class="switch">
-                    <input type="checkbox" ${alumno.permiso_salida ? 'checked' : ''} disabled>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="bool-cell">
-                <label class="switch">
-                    <input type="checkbox" ${alumno.permiso_transporte ? 'checked' : ''}
-                        data-dni="${alumno.dni}" data-field="permiso_transporte">
-                    <span class="slider round"></span>
-                </label>
-            </div>
-        </div>`;
-    });
-
-    body.innerHTML = html;
-
-    body.querySelectorAll('input[data-field="permiso_transporte"]').forEach(chk => {
-        chk.addEventListener('change', async function () {
-            const dni   = this.dataset.dni;
-            const valor = this.checked;
-            try {
-                await fetch(GLOBALS.URL_UPDATE_TRANSPORTE, {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ dni, valor })
-                });
-            } catch (e) {
-                this.checked = !valor;
-            }
-        });
-    });
-}
-
-function configurarBuscador() {
-    document.getElementById('mainSearch')?.addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('#mainTableBody .table-row').forEach(row => {
-            row.style.display = (row.dataset.nombre || '').includes(q) ? '' : 'none';
-        });
-    });
-}

@@ -3,13 +3,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputInvisible = document.getElementById('nfcInput');
     const statusMsg = document.getElementById('nfc-status-msg');
 
-    // Al abrir el modal
+    const closeModalNfc = () => {
+        modal.classList.remove('show');
+        inputInvisible.value = '';
+        statusMsg.innerHTML = '';
+    };
+
     document.getElementById('btnOpenNfcModal').onclick = () => {
-        modal.style.display = "flex";
+        modal.classList.add('show');
         statusMsg.innerHTML = '<small><i class="fa-solid fa-spinner fa-spin"></i> Esperando tarjeta...</small>';
-        inputInvisible.value = "";
+        inputInvisible.value = '';
         inputInvisible.focus();
     };
+
+    document.getElementById('closeModalNfc').onclick = closeModalNfc;
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModalNfc(); });
 
     // Al detectar lectura (Enter)
     inputInvisible.addEventListener('keydown', async (e) => {

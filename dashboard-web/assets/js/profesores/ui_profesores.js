@@ -46,7 +46,15 @@ window.UI_Profesores = {
                 <div class="text-gray">${prof.departamento || ''}</div>
                 
                 <div>
-                    ${tieneNFC ? `<span class="nfc-id-tag"><i class="fa-solid fa-rss"></i>${prof.uid}</span>` : `<button class="btn-vincular" data-dni="${prof.dni}">Vincular</button>`}
+                    ${tieneNFC
+                        ? `<span class="nfc-id-tag nfc-tag-wrapper">
+                            <i class="fa-solid fa-rss"></i>${prof.uid}
+                            <button class="btn-unlink-nfc" onclick="confirmarDesvincularNFCProf('${prof.uid}', '${prof.nombre || ''} ${prof.apellido || ''}')" title="Desvincular NFC">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                           </span>`
+                        : `<button class="btn-vincular" data-dni="${prof.dni}" data-nombre="${prof.nombre || ''} ${prof.apellido || ''}" onclick="prepararAsignacionNFCProf(this)">Vincular</button>`
+                    }
                 </div>
 
                 <div class="text-center">

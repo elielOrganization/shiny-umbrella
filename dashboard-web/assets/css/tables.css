@@ -65,6 +65,136 @@
     grid-template-columns: minmax(180px, 2fr) 1fr 1.4fr 80px 80px 110px;
 }
 
+/* Layout LOGS (4 columnas: Hora, Persona, NFC, Tipo) */
+.table-grid-logs {
+    display: grid;
+    grid-template-columns: 140px minmax(150px, 1fr) minmax(120px, 1fr) 110px;
+    gap: 12px;
+    align-items: center;
+    padding: 11px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Header del panel de logs */
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.logs-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.logs-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+    font-size: 0.8rem;
+}
+
+.logs-refresh-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.logs-refresh-btn:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+/* Pestañas del panel de logs */
+.logs-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f8fafc;
+    padding: 0 20px;
+}
+
+.logs-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: -2px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none;
+    border-radius: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.logs-tab:hover { color: #374151; }
+.logs-tab:focus { outline: none; box-shadow: none; }
+.logs-tab:active { background: transparent; }
+
+.logs-tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+/* Overflow/ellipsis para celdas de grids */
+.table-grid-main > div,
+.table-grid-logs > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Badges de entrada/salida */
+.log-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.log-entrada {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.log-salida {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 /* ==========================================================================
    3. COMPONENTES DE CELDA (TEXTO, TAGS, SWITCHES)
    ========================================================================== */
@@ -80,6 +210,47 @@
 .text-gray { color: var(--text-gray); font-size: 0.9rem; }
 .text-mono { font-family: 'Courier New', monospace; font-weight: bold; }
 .text-center { display: flex; justify-content: center; align-items: center; text-align: center; }
+
+/* Wrapper NFC con X integrada en el pill */
+.nfc-tag-wrapper {
+    position: relative;
+    padding-right: 8px;
+    transition: padding-right 0.2s ease;
+}
+
+.nfc-tag-wrapper:hover {
+    padding-right: 26px;
+}
+
+.btn-unlink-nfc {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.35);
+    color: white;
+    font-size: 0.55rem;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s;
+}
+
+.btn-unlink-nfc:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.nfc-tag-wrapper:hover .btn-unlink-nfc {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
 
 /* Tag de ID NFC */
 .nfc-id-tag,

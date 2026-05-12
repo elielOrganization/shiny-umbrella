@@ -118,7 +118,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. EDICIÓN DE ALUMNOS ---
+    // --- 4. DESVINCULAR NFC ALUMNO ---
+    let activeUnlinkUidAlumno = null;
+
+    window.confirmarDesvincularNFC = function(uid, nombre) {
+        activeUnlinkUidAlumno = uid;
+        const modal = document.getElementById('unlinkNfcAlumnoModal');
+        const nameEl = document.getElementById('unlinkNfcAlumnoNombre');
+        if (nameEl) nameEl.textContent = nombre;
+        if (modal)  modal.classList.add('show');
+    };
+
+    const btnCancelUnlink = document.getElementById('btnCancelUnlinkAlumno');
+    const btnConfirmUnlink = document.getElementById('btnConfirmUnlinkAlumno');
+    const unlinkModal = document.getElementById('unlinkNfcAlumnoModal');
+
+    if (btnCancelUnlink) {
+        btnCancelUnlink.addEventListener('click', () => {
+            unlinkModal.classList.remove('show');
+            activeUnlinkUidAlumno = null;
+        });
+    }
+
+    if (btnConfirmUnlink) {
+        btnConfirmUnlink.addEventListener('click', async () => {
+            if (!activeUnlinkUidAlumno) return;
+            const originalText = btnConfirmUnlink.innerHTML;
+            btnConfirmUnlink.disabled = true;
+            btnConfirmUnlink.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Desvinculando...';
+
+            try {
+                const res = await fetch(GLOBALS.URL_UNLINK_CARD, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid: activeUnlinkUidAlumno })
+                }).then(r => r.json());
+
+                if (res.error) throw new Error(res.error.message || 'Error al desvincular');
+                unlinkModal.classList.remove('show');
+                window.fetchAlumnos();
+            } catch (err) {
+                alert('Error al desvincular: ' + err.message);
+            } finally {
+                btnConfirmUnlink.disabled = false;
+                btnConfirmUnlink.innerHTML = originalText;
+                activeUnlinkUidAlumno = null;
+            }
+        });
+    }
+
+    // --- 5. EDICIÓN DE ALUMNOS ---
     const formEditAlumno = document.getElementById('formEditAlumno');
     if (formEditAlumno) {
         formEditAlumno.addEventListener('submit', async function(e) {
@@ -157,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgStatus = document.getElementById('imgStatusNfc');
     const iconWaiting = document.getElementById('iconWaiting');
 
+    const modalBox = document.querySelector('#modalNfcAlumnos .modal-box-vincular');
+    const setColor = c => { if (modalBox) modalBox.style.borderTopColor = c; };
+
     if (nfcInput) {
         nfcInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
@@ -166,28 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!uid || !dni) return;
 
-                // UI: Empezar a procesar
                 iconWaiting.style.display = 'none';
                 imgStatus.src = '../assets/img/logo_umbrella.png';
                 imgStatus.style.display = 'block';
                 imgStatus.classList.add('spinning-umbrella');
-                nfcMsg.className = ''; 
-                nfcMsg.innerHTML = "Consultando con Odoo...";
+                nfcMsg.className = '';
+                nfcMsg.innerHTML = 'Consultando con Odoo...';
+                setColor('#3b82f6');
 
                 try {
-                    // Llamada a la API
                     const res = await AlumnosAPI.assignCard(uid, dni);
-                    
-                    // MANEJO DE MENSAJES DE ODOO (status y message)
-                    if (res.status === 'error') {
-                        throw new Error(res.message || "Error al vincular");
-                    }
 
-                    // --- ÉXITO ---
+                    if (res.status === 'error') throw new Error(res.message || 'Error al vincular');
+
                     imgStatus.classList.remove('spinning-umbrella');
                     imgStatus.src = '../assets/img/logo_umbrella_success.png';
                     nfcMsg.className = 'msg-success';
                     nfcMsg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${res.message || 'Vinculado con éxito'}`;
+                    setColor('#10b981');
 
                     setTimeout(() => {
                         document.getElementById('modalNfcAlumnos').classList.remove('show');
@@ -195,13 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 2000);
 
                 } catch (err) {
-                    // --- ERROR ---
                     imgStatus.classList.remove('spinning-umbrella');
                     imgStatus.src = '../assets/img/logo_umbrella_error.png';
                     nfcMsg.className = 'msg-error';
                     nfcMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${err.message}`;
+                    setColor('#ef4444');
 
-                    // Reset para reintentar tras el error
                     setTimeout(() => {
                         if (document.getElementById('modalNfcAlumnos').classList.contains('show')) {
                             nfcInput.value = '';
@@ -209,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             iconWaiting.style.display = 'block';
                             nfcMsg.className = '';
                             nfcMsg.innerHTML = '<small><i class="fa-solid fa-spinner fa-spin"></i> Esperando señal...</small>';
+                            setColor('#007bff');
                             nfcInput.focus();
                         }
                     }, 4000);

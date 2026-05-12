@@ -65,7 +65,104 @@
     transform: rotate(-90deg); 
 }
 
-.nav-list { list-style: none; }
+/* --- SECCIÓN INFERIOR (perfil + logout) --- */
+.sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+    flex-shrink: 0;
+}
+
+/* --- PERFIL --- */
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: default;
+    transition: background 0.2s, border-color 0.2s, padding 0.4s;
+}
+
+.sidebar-avatar {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue), #6366f1);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.03em;
+}
+
+.sidebar-profile-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-profile-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-profile-role {
+    font-size: 0.72rem;
+    color: var(--text-gray);
+}
+
+/* Colapsado: quita la tarjeta y centra el avatar */
+.sidebar.collapsed .sidebar-profile {
+    background: transparent;
+    border-color: transparent;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+/* --- BOTÓN LOGOUT --- */
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #ef4444;
+    font-weight: 500;
+    font-size: 0.9rem;
+    gap: 12px;
+    white-space: nowrap;
+    transition: background 0.2s, padding 0.4s;
+}
+
+.sidebar-logout:hover { background: #fef2f2; }
+
+.sidebar-logout i {
+    font-size: 1.1rem;
+    min-width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Colapsado: centra el icono */
+.sidebar.collapsed .sidebar-logout {
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.nav-list { list-style: none; flex: 1; }
 .nav-item {
     display: flex; 
     align-items: center; 

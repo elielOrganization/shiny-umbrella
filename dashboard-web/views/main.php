@@ -13,7 +13,7 @@ include '../includes/sidebar.php';
     <div class="stats-grid">
         <div class="card">
             <div class="card-title">
-                <i class="fa-solid fa-user-group" style="margin-right:6px;color:#3b82f6;"></i>Total Alumnado
+                <i class="fa-solid fa-user-group" style="margin-right:6px;color:#3b82f6;"></i>Alumnado
             </div>
             <div class="card-value" id="statAlumnos">—</div>
             <div class="card-subtext">Alumnos registrados</div>
@@ -55,33 +55,38 @@ include '../includes/sidebar.php';
         </div>
     </div>
 
-    <!-- Tabla gestión rápida de permisos -->
-    <div class="table-container">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:#f8fafc;border-bottom:2px solid #e5e7eb;">
-            <span style="font-weight:700;font-size:1rem;color:#1f2937;">
-                <i class="fa-solid fa-sliders" style="margin-right:8px;color:#6b7280;font-size:0.9rem;"></i>
-                Gestión Rápida de Permisos
-            </span>
-            <div class="search-box" style="max-width:260px;">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Buscar alumno..." class="search-input" id="mainSearch" style="width:220px;">
+    <!-- Tabla de registros recientes -->
+    <div class="table-container logs-container">
+        <div class="logs-header">
+            <div class="logs-header-left">
+                <div class="logs-icon-wrap"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <span>Entradas y Salidas Recientes</span>
             </div>
+            <button class="logs-refresh-btn" onclick="cargarLogs()" title="Actualizar">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
         </div>
 
-        <!-- Cabecera de columnas -->
-        <div class="table-grid-main table-header-row">
-            <div>Alumno/a</div>
-            <div>Grupo</div>
+        <div class="logs-tabs">
+            <button class="logs-tab active" data-tipo="profesor" onclick="switchLogsTab(this)">
+                <i class="fa-solid fa-chalkboard-user"></i> Profesores
+            </button>
+            <button class="logs-tab" data-tipo="alumno" onclick="switchLogsTab(this)">
+                <i class="fa-solid fa-user-group"></i> Alumnos
+            </button>
+        </div>
+
+        <div class="table-grid-logs table-header-row">
+            <div>Hora</div>
+            <div>Persona</div>
             <div>NFC</div>
-            <div class="text-center">Recreo</div>
-            <div class="text-center">Salida</div>
-            <div class="text-center">Transporte</div>
+            <div class="text-center">Tipo</div>
         </div>
 
-        <div id="mainTableBody">
-            <div class="table-main-loader" id="mainTableLoader">
+        <div id="logsTableBody">
+            <div class="table-main-loader" id="logsLoader">
                 <img src="../assets/img/logo_umbrella.png" class="spinning-umbrella">
-                <p>Cargando datos...</p>
+                <p>Cargando registros...</p>
             </div>
         </div>
     </div>

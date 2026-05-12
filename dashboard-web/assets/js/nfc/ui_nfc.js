@@ -57,18 +57,14 @@ window.UI_NFC = {
 
     abrirModalEliminar: function(uid) {
         const modal = document.getElementById('deleteNfcModal');
-        const textElement = document.getElementById('deleteNfcUidText');
-        if (modal && textElement) {
-            textElement.textContent = uid;
-            modal.style.display = 'flex';
-            // Guardamos el UID en un atributo del botón para recuperarlo al confirmar
-            document.getElementById('btnConfirmDeleteNfc').setAttribute('data-uid', uid);
-        }
+        if (!modal) return;
+        document.getElementById('deleteNfcUidText').textContent = uid;
+        document.getElementById('btnConfirmDeleteNfc').setAttribute('data-uid', uid);
+        modal.classList.add('show');
     },
 
     cerrarModalEliminar: function() {
-        const modal = document.getElementById('deleteNfcModal');
-        if (modal) modal.style.display = 'none';
+        document.getElementById('deleteNfcModal')?.classList.remove('show');
     }
 };
 
@@ -90,12 +86,11 @@ window.UI_NFC.notificarModal = function(mensaje, tipo) {
 };
 
 window.UI_NFC.abrirModalDesvincular = function(uid) {
-    const modal = document.getElementById('unlinkNfcModal');
     document.getElementById('unlinkNfcUidText').textContent = uid;
     document.getElementById('btnConfirmUnlinkNfc').setAttribute('data-uid', uid);
-    modal.style.display = 'flex';
+    document.getElementById('unlinkNfcModal').classList.add('show');
 };
 
 window.UI_NFC.cerrarModalDesvincular = function() {
-    document.getElementById('unlinkNfcModal').style.display = 'none';
+    document.getElementById('unlinkNfcModal').classList.remove('show');
 };

@@ -114,7 +114,7 @@ include '../includes/sidebar.php';
                     </div>
                 </div>
 
-                <button class="btn-primary" id="btnAddProfesor"><i class="fa-solid fa-plus"></i> Añadir</button>
+                <button class="btn-primary" id="btnAddProfesor"><i class="fa-solid fa-plus"></i> Añadir Profesor</button>
             </div>
         </div>
     </div>

@@ -20,14 +20,14 @@ document.addEventListener('mouseover', (e) => {
         _showTooltip('Campo calculado según la edad del alumno');
         return;
     }
-    const navItem = e.target.closest('.nav-item[data-tooltip]');
-    if (navItem && document.getElementById('sidebar')?.classList.contains('collapsed')) {
-        _showTooltip(navItem.dataset.tooltip);
+    const sidebarTip = e.target.closest('[data-tooltip]');
+    if (sidebarTip && document.getElementById('sidebar')?.classList.contains('collapsed')) {
+        _showTooltip(sidebarTip.dataset.tooltip);
     }
 });
 
 document.addEventListener('mouseout', (e) => {
-    if (e.target.closest('.campo-calculado') || e.target.closest('.nav-item[data-tooltip]')) {
+    if (e.target.closest('.campo-calculado') || e.target.closest('[data-tooltip]')) {
         _hideTooltip();
     }
 });

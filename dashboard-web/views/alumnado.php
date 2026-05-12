@@ -80,7 +80,7 @@ include '../includes/sidebar.php';
                     </div>
                 </div>
 
-                <button class="btn-primary" id="btnAddStudent"><i class="fa-solid fa-plus"></i> Añadir</button>
+                <button class="btn-primary" id="btnAddStudent"><i class="fa-solid fa-plus"></i> Añadir Alumno</button>
             </div>
         </div>
     </div>

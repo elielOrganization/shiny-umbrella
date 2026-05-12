@@ -152,17 +152,5 @@ include '../includes/sidebar.php';
 include '../includes/modales_vinculacion.php'; 
 ?>
 
-<script src="../assets/js/config.js"></script>
-<script src="../assets/js/ui.js"></script>
-<script>
-    // Lógica para abrir/cerrar el modal
-    const modal = document.getElementById('modalNfc');
-    const btn = document.getElementById('btnOpenNfcModal');
-    const span = document.querySelector('.close-modal');
-
-    btn.onclick = () => modal.style.display = "flex";
-    span.onclick = () => modal.style.display = "none";
-    window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; }
-</script>
 </body>
 </html>
