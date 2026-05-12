@@ -1,0 +1,122 @@
+================================================================
+  SISTEMA DE FICHAJE DE PROFESORES — MANUAL TÉCNICO INTERNO
+  Shiny Umbrella · v1.0
+================================================================
+
+
+¿QUÉ ES ESTE SISTEMA?
+─────────────────────
+Aplicación web de fichaje de entrada y salida para profesores
+mediante tarjetas NFC. Registra automáticamente la hora y el
+tipo de movimiento (entrada o salida) en la base de datos del
+colegio cada vez que un profesor acerca su tarjeta al lector.
+
+
+ARCHIVOS DEL SISTEMA
+─────────────────────
+  app_html/
+  ├── index.html        → La aplicación completa (interfaz + lógica)
+  ├── abrir.bat         → Acceso directo para abrir la app
+  └── MANUAL_TECNICO.txt → Este archivo
+
+
+REQUISITOS
+──────────
+  - PC con Windows 10 o Windows 11
+  - Google Chrome o Microsoft Edge instalado
+    (Edge viene preinstalado en Windows 10/11)
+  - Lector NFC USB conectado al PC (debe funcionar en modo
+    teclado/HID, es decir, que el PC lo reconozca como teclado)
+  - Conexión de red al servidor del colegio (10.102.6.245)
+
+
+CÓMO SE ABRE LA APP
+────────────────────
+  1. Conectar el lector NFC al USB del PC
+  2. Hacer doble clic en "abrir.bat"
+  3. Se abrirá automáticamente el navegador con la interfaz
+
+  El archivo abrir.bat intenta abrir Chrome primero y, si no
+  está instalado, usa Edge. No hace falta instalar nada más.
+
+
+CÓMO FUNCIONA POR DENTRO
+─────────────────────────
+  1. La pantalla queda en espera con el mensaje
+     "Acerque su tarjeta NFC al lector".
+
+  2. El profesor acerca su tarjeta NFC al lector.
+
+  3. El lector, en modo teclado, "escribe" el código
+     identificador de la tarjeta (UID) y pulsa Enter.
+
+  4. La aplicación captura ese código de forma invisible
+     (hay un campo de texto oculto siempre activo).
+
+  5. Se envía una petición al servidor Odoo del colegio:
+       Dirección : http://10.102.6.245:8069
+       Endpoint  : /nfc/registrar_fichaje_profesor
+       Formato   : JSON-RPC 2.0
+
+  6. El servidor busca al profesor por su UID, determina si
+     corresponde una ENTRADA o SALIDA (alternancia automática,
+     con reinicio diario) y guarda el registro en la base de datos.
+
+  7. La aplicación muestra en pantalla:
+       - ENTRADA REGISTRADA (fondo verde) con el nombre del
+         profesor y la hora exacta del fichaje.
+       - SALIDA REGISTRADA (fondo azul) con los mismos datos.
+       - ACCESO DENEGADO (fondo rojo) si la tarjeta no está
+         registrada en el sistema.
+
+  8. El mensaje desaparece automáticamente a los 4 segundos
+     y el sistema queda listo para el siguiente fichaje.
+
+
+LÓGICA DE ENTRADA / SALIDA
+───────────────────────────
+  El servidor decide automáticamente si es entrada o salida:
+
+  - Si el profesor no tiene ningún fichaje hoy → ENTRADA
+  - Si el último fichaje de hoy fue una entrada → SALIDA
+  - Si el último fichaje de hoy fue una salida  → ENTRADA
+  - Al inicio de cada nuevo día se reinicia siempre a ENTRADA
+
+
+POSIBLES ERRORES Y SOLUCIONES
+──────────────────────────────
+  "Tarjeta no reconocida"
+      La tarjeta no está vinculada a ningún profesor en el
+      sistema. Hay que registrarla desde el panel de Odoo.
+
+  "Error de conexión con el servidor"
+      El PC no tiene acceso a la red del colegio o el servidor
+      Odoo no está en marcha. Verificar la conexión de red y
+      el estado del servidor.
+
+  La app no se abre al hacer doble clic en abrir.bat
+      Comprobar que Chrome o Edge están instalados. Si la ruta
+      de Chrome no es la estándar, editar abrir.bat y poner
+      la ruta completa al ejecutable de Chrome.
+
+  La tarjeta se lee pero no pasa nada
+      El lector puede no estar en modo teclado/HID. Consultar
+      el manual del lector para activar ese modo.
+
+
+SERVIDOR Y BASE DE DATOS
+─────────────────────────
+  Servidor : Odoo 18
+  IP       : 10.102.6.245
+  Puerto   : 8069
+  Módulo   : attendance_nfc
+  Modelos  : nfc.profesor / nfc.fichaje.profesor
+
+  La gestión de profesores (altas, bajas, vinculación de
+  tarjetas) se realiza desde el panel de administración
+  de Odoo, no desde esta aplicación.
+
+
+================================================================
+  Shiny Umbrella · Sistema de Fichaje · v1.0
+================================================================
