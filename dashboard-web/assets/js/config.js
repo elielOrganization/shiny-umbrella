@@ -27,6 +27,7 @@ const GLOBALS = {
 
     URL_GET_ALUMNOS:     '../controllers/get_alumnos.php',
     URL_GET_PROFESORES: '../controllers/get_profesores.php',
+    URL_GET_FICHAJES_PROFESORES: '../controllers/get_fichajes_profesores.php',
 
     URL_UPDATE_TRANSPORTE: '../controllers/update_transporte.php',
     URL_UPDATE_ESTADO: '../controllers/update_estado.php'
