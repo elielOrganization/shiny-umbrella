@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Paraguas centrado en blanco sobre fondo azul -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+        M54,18
+        C36,18 21,31 21,47
+        C21,48.1 21.9,49 23,49
+        C24.1,49 25,48.1 25,47
+        C25,45 27.2,43 30,43
+        C32.8,43 35,45 35,47
+        C35,48.1 35.9,49 37,49
+        C38.1,49 39,48.1 39,47
+        C39,45 41.2,43 44,43
+        C46.8,43 49,45 49,47
+        L49,80
+        C49,83.3 51.7,86 55,86
+        C58.3,86 61,83.3 61,80
+        C61,78.9 60.1,78 59,78
+        C57.9,78 57,78.9 57,80
+        C57,81.1 56.1,82 55,82
+        C53.9,82 53,81.1 53,80
+        L53,47
+        C53,45 55.2,43 58,43
+        C60.8,43 63,45 63,47
+        C63,48.1 63.9,49 65,49
+        C66.1,49 67,48.1 67,47
+        C67,45 69.2,43 72,43
+        C74.8,43 77,45 77,47
+        C77,48.1 77.9,49 79,49
+        C80.1,49 81,48.1 81,47
+        C81,31 66,18 54,18Z" />
+</vector>

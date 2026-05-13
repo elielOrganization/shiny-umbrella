@@ -4,15 +4,23 @@ import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
-import android.view.animation.Animation
-import android.view.animation.RotateAnimation
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.appcode.databinding.ActivityMainBinding
 import com.example.appcode.databinding.DialogLoadingBinding
@@ -27,8 +35,16 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Actualizado para incluir TRANSPORTE
     enum class ModoEscaneo { RECREO, TRANSPORTE, NINGUNO }
+
+    companion object {
+        private const val SERVER_IP = "10.102.6.245"
+    }
+
+    data class ResultadoOdoo(
+        val permiso: String,
+        val nombreCompleto: String
+    )
 
     private var modoActual = ModoEscaneo.NINGUNO
     private var nfcAdapter: NfcAdapter? = null
@@ -44,7 +60,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Animaciones de entrada para ambos botones
         setupAnimations()
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
@@ -54,34 +69,84 @@ class MainActivity : AppCompatActivity() {
             PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Botón RECREO
         binding.btnRecreo.setOnClickListener {
             ejecutarClickBoton(it) { prepararEscaneo(ModoEscaneo.RECREO) }
         }
 
-        // Botón TRANSPORTE
         binding.btnTransporte.setOnClickListener {
             ejecutarClickBoton(it) { prepararEscaneo(ModoEscaneo.TRANSPORTE) }
         }
     }
 
     private fun setupAnimations() {
-        val views = listOf(binding.btnRecreo, binding.btnTransporte)
-        views.forEachIndexed { index, view ->
+        binding.logoUmbrella.apply {
+
+            scaleX = 0f
+            scaleY = 0f
+            alpha = 0f
+            animate()
+                .scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(600)
+                .setInterpolator(OvershootInterpolator(1.5f))
+                .withEndAction { startLogoPulse() }
+                .start()
+        }
+
+        binding.header.apply {
+            alpha = 0f
+            translationY = -20f
+            animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(500)
+                .setStartDelay(250)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+
+        val buttons = listOf(binding.btnRecreo, binding.btnTransporte)
+        buttons.forEachIndexed { index, view ->
             view.alpha = 0f
-            view.translationY = 50f
+            view.translationY = 90f
             view.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(800)
-                .setStartDelay(300L + (index * 100))
+                .alpha(1f).translationY(0f)
+                .setDuration(550)
+                .setStartDelay(350L + (index * 130))
+                .setInterpolator(DecelerateInterpolator(1.8f))
+                .start()
+        }
+
+        binding.cardMovement.apply {
+            alpha = 0f
+            translationY = 40f
+            animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(450)
+                .setStartDelay(650)
+                .setInterpolator(DecelerateInterpolator())
                 .start()
         }
     }
 
+    private fun startLogoPulse() {
+        binding.logoUmbrella.animate()
+            .scaleX(1.06f).scaleY(1.06f)
+            .setDuration(1000)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                binding.logoUmbrella.animate()
+                    .scaleX(1f).scaleY(1f)
+                    .setDuration(1000)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .withEndAction { startLogoPulse() }
+                    .start()
+            }
+            .start()
+    }
+
     private fun ejecutarClickBoton(view: android.view.View, accion: () -> Unit) {
-        view.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
-            view.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+        view.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
+            view.animate().scaleX(1f).scaleY(1f).setDuration(150)
+                .setInterpolator(OvershootInterpolator(2f)).start()
             accion()
         }.start()
     }
@@ -105,24 +170,19 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(true)
             .setOnCancelListener { resetEstadoEscaneo() }
             .create()
-        dialogNfc?.window?.attributes?.windowAnimations = android.R.style.Animation_Dialog
+        dialogNfc?.window?.attributes?.windowAnimations = R.style.DialogAnimation
         dialogNfc?.show()
         dialogNfc?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     private fun mostrarLoading() {
         val loadingBinding = DialogLoadingBinding.inflate(layoutInflater)
-        val rotate = RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f).apply {
-            duration = 1000
-            repeatCount = Animation.INFINITE
-        }
-        loadingBinding.imgLoadingUmbrella.startAnimation(rotate)
-
         dialogLoading = AlertDialog.Builder(this)
             .setView(loadingBinding.root)
             .setCancelable(false)
             .create()
         dialogLoading?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialogLoading?.window?.attributes?.windowAnimations = R.style.DialogAnimation
         dialogLoading?.show()
     }
 
@@ -143,7 +203,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val startTime = System.currentTimeMillis()
 
-            // Determinamos el endpoint y el campo de búsqueda dinámicamente
             val endpoint = if (modoActual == ModoEscaneo.RECREO) "check_recreo" else "check_transporte"
             val campoPermiso = if (modoActual == ModoEscaneo.RECREO) "permiso_recreo" else "permiso_transporte"
 
@@ -158,24 +217,34 @@ class MainActivity : AppCompatActivity() {
             val fechaHoraActual = sdf.format(Date())
 
             val servicioTexto = if (modoActual == ModoEscaneo.RECREO) "RECREO" else "TRANSPORTE"
-            val estadoTexto = if (resultado == "true") "$servicioTexto ACEPTADO" else "$servicioTexto DENEGADO"
+            val estadoTexto = if (resultado.permiso == "true") "✓ $servicioTexto ACEPTADO" else "✗ $servicioTexto DENEGADO"
+            val colorEstado = if (resultado.permiso == "true")
+                ContextCompat.getColor(this@MainActivity, R.color.umbrella_green)
+            else
+                ContextCompat.getColor(this@MainActivity, R.color.umbrella_red)
 
-            binding.tvUltimoMovimiento.text = "$fechaHoraActual\n\nUID: $uidTag\n\n$estadoTexto"
+            val nombreMostrar = resultado.nombreCompleto.ifBlank { "Alumno desconocido" }
+            val textoBase = "$fechaHoraActual\n$nombreMostrar\n\n"
+            val fullText = textoBase + estadoTexto
+            val spannable = SpannableStringBuilder(fullText)
+            val start = textoBase.length
+            spannable.setSpan(ForegroundColorSpan(colorEstado), start, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            spannable.setSpan(StyleSpan(Typeface.BOLD), start, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            binding.tvUltimoMovimiento.text = spannable
 
-            when (resultado) {
-                "true" -> mostrarResultado(R.layout.dialog_success, uidTag)
-                "false" -> mostrarResultado(R.layout.dialog_error, uidTag)
+            when (resultado.permiso) {
+                "true" -> mostrarResultado(R.layout.dialog_success, nombreMostrar)
+                "false" -> mostrarResultado(R.layout.dialog_error, nombreMostrar)
                 else -> {
                     resetEstadoEscaneo()
-                    Toast.makeText(this@MainActivity, "Error: $resultado", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Error: ${resultado.permiso}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private suspend fun realizarPeticionOdoo(uid: String, endpoint: String, campo: String): String = withContext(Dispatchers.IO) {
-
-        val urlEndpoint = "http://10.102.7.196:8069/nfc/$endpoint"
+    private suspend fun realizarPeticionOdoo(uid: String, endpoint: String, campo: String): ResultadoOdoo = withContext(Dispatchers.IO) {
+        val urlEndpoint = "http://$SERVER_IP:8069/nfc/$endpoint"
         return@withContext try {
             val url = URL(urlEndpoint)
             val conn = url.openConnection() as HttpURLConnection
@@ -189,28 +258,63 @@ class MainActivity : AppCompatActivity() {
 
             if (conn.responseCode == 200) {
                 val response = conn.inputStream.bufferedReader().use { it.readText() }
-
-                if (response.contains("\"$campo\": true")) "true" else "false"
+                val permiso = if (response.contains("\"$campo\": true")) "true" else "false"
+                val nombre = extraerCampoJson(response, "nombre")
+                val apellido = extraerCampoJson(response, "apellido")
+                val nombreCompleto = "$nombre $apellido".trim()
+                ResultadoOdoo(permiso, nombreCompleto)
             } else {
-                "Error ${conn.responseCode}"
+                ResultadoOdoo("Error ${conn.responseCode}", "")
             }
         } catch (e: Exception) {
-            "Error de conexión"
+            ResultadoOdoo("Error de conexión", "")
         }
     }
 
-    private fun mostrarResultado(layoutResId: Int, uidMostrada: String) {
+    private fun extraerCampoJson(json: String, campo: String): String {
+        val patron = "\"$campo\":\\s*\"([^\"]+)\"".toRegex()
+        return patron.find(json)?.groupValues?.get(1) ?: ""
+    }
+
+    private fun mostrarResultado(layoutResId: Int, nombreAlumno: String) {
         val view = layoutInflater.inflate(layoutResId, null)
-        view.findViewById<TextView>(R.id.txt_uid_report)?.text = "ID : $uidMostrada"
+        view.findViewById<TextView>(R.id.txt_uid_report)?.text = nombreAlumno
+
+        val imgView = view.findViewById<ImageView>(R.id.img_success_icon)
+            ?: view.findViewById<ImageView>(R.id.img_error_icon)
 
         val dialog = AlertDialog.Builder(this)
             .setView(view)
             .setCancelable(true)
             .setOnDismissListener { resetEstadoEscaneo() }
             .create()
-        dialog.window?.attributes?.windowAnimations = android.R.style.Animation_Dialog
+        dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        imgView?.apply {
+            scaleX = 0f
+            scaleY = 0f
+            alpha = 0f
+            animate()
+                .scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(550)
+                .setStartDelay(150)
+                .setInterpolator(OvershootInterpolator(2.5f))
+                .withEndAction {
+                    animate()
+                        .scaleX(1.08f).scaleY(1.08f)
+                        .setDuration(180)
+                        .setInterpolator(AccelerateDecelerateInterpolator())
+                        .withEndAction {
+                            animate()
+                                .scaleX(1f).scaleY(1f)
+                                .setDuration(180)
+                                .setInterpolator(AccelerateDecelerateInterpolator())
+                                .start()
+                        }.start()
+                }.start()
+        }
     }
 
     private fun resetEstadoEscaneo() {

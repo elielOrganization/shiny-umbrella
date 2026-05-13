@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.AppCode" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/umbrella_blue_primary</item>
+        <item name="colorPrimaryVariant">@color/umbrella_blue_dark</item>
+        <item name="colorOnPrimary">@color/umbrella_white</item>
+        <item name="android:windowBackground">@color/umbrella_surface</item>
+        <item name="android:statusBarColor">@color/umbrella_blue_dark</item>
+    </style>
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit</item>
+    </style>
+</resources>

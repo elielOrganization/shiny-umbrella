@@ -5,76 +5,55 @@
     android:layout_gravity="center">
 
     <LinearLayout
-        android:layout_width="300dp"
+        android:layout_width="280sp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/shape_dialog_white"
-        android:orientation="vertical">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <!-- Cabecera verde con el paraguas -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:background="@drawable/shape_dialog_header_success"
-            android:gravity="center"
-            android:orientation="vertical">
+        <ImageView
+            android:id="@+id/img_success_icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_umbrella_logo_success"
+            android:contentDescription="Umbrella Success" />
 
-            <ImageView
-                android:id="@+id/img_success_icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_umbrella_logo_success"
-                android:contentDescription="Exito" />
-        </LinearLayout>
-
-        <!-- Contenido blanco -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:gravity="center"
-            android:paddingLeft="28dp"
-            android:paddingRight="28dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="28dp">
+            android:text="Salida autorizada"
+            android:textColor="#2E7D32"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Salida Autorizada"
-                android:textColor="#2E7D32"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="El registro se ha completado correctamente en el sistema."
+            android:textAlignment="center"
+            android:textColor="@color/black" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="El registro se ha completado correctamente en el sistema."
-                android:textAlignment="center"
-                android:textColor="@color/umbrella_text_secondary"
-                android:textSize="13sp"
-                android:lineSpacingMultiplier="1.4" />
+        <View
+            android:layout_width="60dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="20dp"
+            android:background="#2E7D32" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="16dp"
-                android:background="@color/umbrella_divider" />
+        <TextView
+            android:id="@+id/txt_uid_report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="UID: 000000"
+            android:textColor="#66000000"
+            android:textSize="12sp"
+            android:fontFamily="monospace" />
 
-            <TextView
-                android:id="@+id/txt_uid_report"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nombre Alumno"
-                android:textColor="@color/umbrella_green"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center" />
-        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
