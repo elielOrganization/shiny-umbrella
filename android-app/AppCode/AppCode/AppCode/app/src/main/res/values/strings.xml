@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Shiny Umbrella</string>
+    <string name="scan_status_waiting">Esperando señal NFC...</string>
+    <string name="scan_status_validating">Consultando base de datos Odoo...</string>
+    <string name="access_granted">ACCESO CONCEDIDO</string>
+    <string name="access_denied">ACCESO DENEGADO</string>
+    <string name="btn_anticipada">Salida Anticipada</string>
+    <string name="btn_transporte">Salida Transporte</string>
+    <string name="btn_recreo">Salida Recreo</string>
+</resources>

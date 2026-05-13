@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="umbrella_blue_primary">#1565C0</color>
+    <color name="umbrella_blue_dark">#0D47A1</color>
+    <color name="umbrella_blue_light">#E3F2FD</color>
+    <color name="umbrella_white">#FFFFFF</color>
+    <color name="umbrella_surface">#F0F4FF</color>
+    <color name="umbrella_card">#FFFFFF</color>
+    <color name="umbrella_green">#2E7D32</color>
+    <color name="umbrella_green_light">#E8F5E9</color>
+    <color name="umbrella_red">#C62828</color>
+    <color name="umbrella_red_light">#FFEBEE</color>
+    <color name="umbrella_text_primary">#1A237E</color>
+    <color name="umbrella_text_secondary">#78909C</color>
+    <color name="umbrella_divider">#E8EAF6</color>
+    <color name="valid_green">#2E7D32</color>
+    <color name="invalid_red">#C62828</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
