@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     enum class ModoEscaneo { RECREO, TRANSPORTE, NINGUNO }
 
     companion object {
-        private const val SERVER_IP = "10.102.6.245"
+        private const val SERVER_IP = "10.102.6.225"
     }
 
     data class ResultadoOdoo(

@@ -1,4 +1,4 @@
-const SERVER_URL = "http://10.102.6.245:8069/nfc/registrar_fichaje_alumno";
+const SERVER_URL = "http://10.102.6.225:8069/nfc/registrar_fichaje_alumno";
 
 const input       = document.getElementById('nfc-input');
 const nfcCard     = document.getElementById('nfc-card');
