@@ -82,13 +82,20 @@ input.addEventListener('input', () => {
 // Esta función garantiza que siempre se envía el mismo valor a Odoo
 // independientemente del lector usado.
 function normalizarUID(raw) {
-  const limpio = raw.trim().replace(/\s+/g, '');
-  // Si contiene solo dígitos (0-9) → el lector lo emitió en decimal
-  if (/^\d+$/.test(limpio)) {
-    return parseInt(limpio, 10).toString(16).toUpperCase().padStart(8, '0');
+  // Limpieza: quitar espacios, guiones y dos puntos
+  const limpio = raw.trim().replace(/[\s\-:]/g, '');
+
+  if (/[A-Fa-f]/.test(limpio)) {
+    // El lector emitió hex → convertir igual que tagIdToDecimal en Android:
+    // tomar los bytes, invertirlos (little-endian) y calcular el decimal.
+    const bytes = (limpio.match(/.{2}/g) || []).reverse();
+    let decimal = 0;
+    for (const byte of bytes) decimal = decimal * 256 + parseInt(byte, 16);
+    return String(decimal).padStart(10, '0');
   }
-  // Si ya es hex (contiene A-F) → limpiar y mayúsculas
-  return limpio.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+
+  // Ya es decimal → asegurar 10 dígitos con padding
+  return limpio.padStart(10, '0');
 }
 
 // ── Petición al servidor ─────────────────────────────────────────────────────
