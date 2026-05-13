@@ -1,25 +1,59 @@
-const SERVER_URL = "http://10.102.6.245:8069/nfc/registrar_fichaje_profesor";
+const SERVER_URL = "http://10.102.6.245:8069/nfc/registrar_fichaje_alumno";
 
-const input      = document.getElementById('nfc-input');
-const estadoEl   = document.getElementById('estado');
-const resultCard = document.getElementById('result-card');
+const input       = document.getElementById('nfc-input');
+const nfcCard     = document.getElementById('nfc-card');
+const estadoEl    = document.getElementById('estado');
+const resultCard  = document.getElementById('result-card');
 const resultTexto = document.getElementById('result-texto');
 const resultHora  = document.getElementById('result-hora');
-const overlay    = document.getElementById('overlay');
-const overlayBox = document.getElementById('overlay-box');
+const overlay     = document.getElementById('overlay');
+const overlayBox  = document.getElementById('overlay-box');
+const btnEntrada  = document.getElementById('btn-entrada');
+const btnSalida   = document.getElementById('btn-salida');
 
+let modoActual  = null;  // 'entrada' | 'salida'
 let buffer      = '';
 let bufferTimer = null;
 let procesando  = false;
 let overlayTimer = null;
 
-// Mantener el input siempre enfocado para capturar el lector NFC
-document.addEventListener('click', () => input.focus());
-document.addEventListener('keydown', () => input.focus());
-window.addEventListener('focus', () => input.focus());
-input.focus();
+// ── Selección de modo ────────────────────────────────────────────────────────
 
-// Capturar lo que escribe el lector NFC (modo teclado/HID)
+btnEntrada.addEventListener('click', () => seleccionarModo('entrada'));
+btnSalida.addEventListener('click',  () => seleccionarModo('salida'));
+
+function seleccionarModo(modo) {
+  modoActual = modo;
+
+  btnEntrada.classList.toggle('activo',   modo === 'entrada');
+  btnEntrada.classList.toggle('inactivo', modo === 'salida');
+  btnSalida.classList.toggle('activo',    modo === 'salida');
+  btnSalida.classList.toggle('inactivo',  modo === 'entrada');
+
+  nfcCard.classList.add('visible');
+  nfcCard.classList.toggle('modo-entrada', modo === 'entrada');
+  nfcCard.classList.toggle('modo-salida',  modo === 'salida');
+
+  setEstado('Esperando tarjeta...', '');
+  input.focus();
+}
+
+function cancelarModo() {
+  modoActual = null;
+  btnEntrada.classList.remove('activo', 'inactivo');
+  btnSalida.classList.remove('activo', 'inactivo');
+  nfcCard.classList.remove('visible', 'modo-entrada', 'modo-salida');
+  buffer = '';
+  input.value = '';
+}
+
+document.getElementById('btn-cancelar').addEventListener('click', cancelarModo);
+
+// ── Captura NFC ──────────────────────────────────────────────────────────────
+
+document.addEventListener('click', () => { if (modoActual) input.focus(); });
+window.addEventListener('focus',   () => { if (modoActual) input.focus(); });
+
 input.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -27,19 +61,19 @@ input.addEventListener('keydown', (e) => {
     buffer = '';
     input.value = '';
     clearTimeout(bufferTimer);
-    if (uid && !procesando) procesarUID(uid);
+    if (uid && modoActual && !procesando) procesarUID(uid);
   }
 });
 
 input.addEventListener('input', () => {
+  if (!modoActual) { input.value = ''; buffer = ''; return; }
   buffer = input.value;
   clearTimeout(bufferTimer);
-  // Fallback: procesar si el lector no envía Enter tras 150ms sin nuevas teclas
   bufferTimer = setTimeout(() => {
     const uid = buffer.trim();
     buffer = '';
     input.value = '';
-    if (uid && uid.length >= 4 && !procesando) procesarUID(uid);
+    if (uid && uid.length >= 4 && modoActual && !procesando) procesarUID(uid);
   }, 150);
 });
 
@@ -57,6 +91,8 @@ function normalizarUID(raw) {
   return limpio.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
 }
 
+// ── Petición al servidor ─────────────────────────────────────────────────────
+
 async function procesarUID(uid) {
   uid = normalizarUID(uid);
   procesando = true;
@@ -69,7 +105,7 @@ async function procesarUID(uid) {
     const resp = await fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { uid } }),
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { uid, tipo: modoActual } }),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
@@ -79,13 +115,15 @@ async function procesarUID(uid) {
 
     if (datos.status === 'ok') {
       mostrarResultado(datos.persona, datos.movimiento);
+    } else if (datos.status === 'denegado') {
+      mostrarError(datos.message || 'Sin autorización para esta operación');
     } else {
       mostrarError(datos.message || 'Tarjeta no reconocida');
     }
   } catch (e) {
     clearTimeout(timeoutId);
     if (e.name === 'AbortError') {
-      mostrarError('Sin respuesta del servidor (3 s)');
+      mostrarError('Sin respuesta del servidor');
     } else {
       mostrarError('Error de conexión con el servidor');
     }
@@ -94,9 +132,11 @@ async function procesarUID(uid) {
     input.value = '';
     buffer = '';
     procesando = false;
-    input.focus();
+    if (modoActual) input.focus();
   }
 }
+
+// ── Overlays ─────────────────────────────────────────────────────────────────
 
 function mostrarResultado(persona, movimiento) {
   const esEntrada = movimiento.toLowerCase() === 'entrada';
@@ -124,7 +164,7 @@ function mostrarError(mensaje) {
   const ahora = new Date();
   overlayBox.className = 'overlay-box overlay-error';
   document.getElementById('overlay-simbolo').textContent = '✗';
-  document.getElementById('overlay-titulo').textContent  = 'ACCESO DENEGADO';
+  document.getElementById('overlay-titulo').textContent  = 'OPERACIÓN DENEGADA';
   document.getElementById('overlay-nombre').textContent  = mensaje;
   document.getElementById('overlay-hora').textContent    = ahora.toLocaleTimeString('es-ES');
   document.getElementById('overlay-fecha').textContent   = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' });
@@ -141,7 +181,7 @@ function abrirOverlay() {
 function cerrarOverlay() {
   overlay.classList.remove('visible');
   clearTimeout(overlayTimer);
-  input.focus();
+  cancelarModo();
 }
 
 function setEstado(texto, clase) {
