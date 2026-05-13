@@ -1,0 +1,278 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #F0F4FF;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Header ── */
+.header {
+  background: #1565C0;
+  padding: 22px 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.header h1 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.header p {
+  color: #B3D4F5;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* ── Centro ── */
+.centro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Botones de modo ── */
+.botones-modo {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-modo {
+  width: 320px;
+  height: 320px;
+  border: 3px solid transparent;
+  border-radius: 36px;
+  cursor: pointer;
+  text-align: center;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+  background: #fff;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.btn-modo:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+.btn-modo:active { transform: scale(0.97); }
+
+.btn-modo .btn-icono { font-size: 100px; display: block; margin-bottom: 20px; }
+.btn-modo .btn-label {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ENTRADA */
+.btn-entrada { border-color: #C8E6C9; }
+.btn-entrada .btn-label { color: #2E7D32; }
+.btn-entrada.activo {
+  background: #E8F5E9;
+  border-color: #2E7D32;
+  box-shadow: 0 0 0 4px rgba(46,125,50,0.15);
+}
+
+/* SALIDA */
+.btn-salida { border-color: #BBDEFB; }
+.btn-salida .btn-label { color: #1565C0; }
+.btn-salida.activo {
+  background: #E3F2FD;
+  border-color: #1565C0;
+  box-shadow: 0 0 0 4px rgba(21,101,192,0.15);
+}
+
+.btn-modo.inactivo { opacity: 0.4; pointer-events: none; }
+
+/* ── Card NFC ── */
+.nfc-card {
+  position: absolute;
+  background: #fff;
+  border: 2px solid #1565C0;
+  border-radius: 24px;
+  width: 340px;
+  padding: 36px 32px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(21, 101, 192, 0.10);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s, border-color 0.3s;
+  pointer-events: none;
+}
+.nfc-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+.nfc-card.modo-entrada { border-color: #2E7D32; }
+.nfc-card.modo-salida  { border-color: #1565C0; }
+
+.nfc-icon {
+  font-size: 64px;
+  display: inline-block;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1.0); }
+  50%       { transform: scale(1.07); }
+}
+.nfc-card h2 {
+  color: #1A237E;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+.estado {
+  font-size: 13px;
+  color: #78909C;
+  margin-top: 8px;
+  min-height: 20px;
+  transition: color 0.3s;
+}
+.estado.leyendo { color: #1565C0; font-weight: 600; }
+
+.btn-cancelar {
+  margin-top: 16px;
+  background: none;
+  border: 1px solid #CFD8DC;
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-size: 12px;
+  color: #90A4AE;
+  cursor: pointer;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  transition: background 0.2s;
+}
+.btn-cancelar:hover { background: #F5F5F5; }
+
+/* ── Card último fichaje ── */
+.result-card {
+  position: absolute;
+  bottom: 24px;
+  background: #fff;
+  border: 1px solid #E0E0E0;
+  border-radius: 16px;
+  width: 420px;
+  padding: 16px 28px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.result-card.visible { opacity: 1; transform: translateY(0); }
+.result-texto {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #78909C;
+}
+.result-texto.entrada { color: #2E7D32; }
+.result-texto.salida  { color: #1565C0; }
+.result-hora {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #78909C;
+  margin-top: 4px;
+}
+
+/* ── Footer ── */
+.footer {
+  background: #0D47A1;
+  padding: 10px;
+  text-align: center;
+  color: #B3D4F5;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Overlay ── */
+.overlay-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.overlay-bg.visible { opacity: 1; pointer-events: all; }
+.overlay-box {
+  background: #fff;
+  border-radius: 28px;
+  width: 480px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  transform: scale(0.82);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.overlay-bg.visible .overlay-box { transform: scale(1); }
+
+.overlay-header { padding: 36px 28px 28px; text-align: center; }
+.overlay-simbolo { font-size: 64px; line-height: 1; display: block; }
+.overlay-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-top: 14px;
+  text-transform: uppercase;
+}
+.overlay-body {
+  padding: 24px 36px 32px;
+  text-align: center;
+  border-top: 1px solid #F0F0F0;
+}
+.overlay-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #B0BEC5;
+  margin-bottom: 6px;
+}
+.overlay-nombre { font-size: 26px; font-weight: 700; margin-bottom: 18px; line-height: 1.2; }
+.overlay-hora-box {
+  background: #F8F9FF;
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.overlay-hora-label { font-size: 11px; color: #B0BEC5; text-transform: uppercase; letter-spacing: 1px; }
+.overlay-hora { font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #1A237E; margin-top: 3px; }
+.overlay-fecha { font-family: 'Courier New', monospace; font-size: 12px; color: #78909C; margin-top: 2px; }
+.overlay-hint { font-size: 12px; color: #CFD8DC; }
+
+.overlay-entrada .overlay-header { background: #A5D6A7; }
+.overlay-entrada .overlay-titulo { color: #1B5E20; }
+.overlay-entrada .overlay-nombre { color: #2E7D32; }
+
+.overlay-salida .overlay-header { background: #90CAF9; }
+.overlay-salida .overlay-titulo { color: #0D47A1; }
+.overlay-salida .overlay-nombre { color: #1565C0; }
+
+.overlay-error .overlay-header { background: #EF9A9A; }
+.overlay-error .overlay-titulo { color: #B71C1C; }
+.overlay-error .overlay-nombre { color: #C62828; font-size: 20px; }
+
+#nfc-input {
+  position: fixed;
+  left: -9999px;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}

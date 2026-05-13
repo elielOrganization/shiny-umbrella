@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shiny Umbrella</string>
+    <string name="scan_status_waiting">Esperando se&#241;al NFC&#8230;</string>
+    <string name="scan_status_validating">Consultando base de datos Odoo&#8230;</string>
+    <string name="access_granted">ACCESO CONCEDIDO</string>
+    <string name="access_denied">ACCESO DENEGADO</string>
+    <string name="btn_transporte">Verificar Transporte</string>
+    <string name="btn_recreo">Verificar Recreo</string>
+    <string name="sin_registros">Sin registros en esta sesi&#243;n</string>
+    <string name="ultimo_movimiento">&#218;LTIMO MOVIMIENTO</string>
+</resources>

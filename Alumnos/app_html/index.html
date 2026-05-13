@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fichaje de Alumnos · Shiny Umbrella</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <input id="nfc-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
+
+  <div class="header">
+    <h1>SHINY UMBRELLA</h1>
+    <p>Registro de Entrada / Salida</p>
+  </div>
+
+  <div class="centro">
+
+    <div class="botones-modo">
+      <button class="btn-modo btn-entrada" id="btn-entrada">
+        <span class="btn-icono">🏫</span>
+        <span class="btn-label">Entrada</span>
+      </button>
+      <button class="btn-modo btn-salida" id="btn-salida">
+        <span class="btn-icono">🚪</span>
+        <span class="btn-label">Salida</span>
+      </button>
+    </div>
+
+    <div class="nfc-card" id="nfc-card">
+      <span class="nfc-icon">📡</span>
+      <h2>Acerque su tarjeta NFC al lector</h2>
+      <div class="estado" id="estado">Esperando tarjeta...</div>
+      <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-texto" id="result-texto"></div>
+      <div class="result-hora" id="result-hora"></div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Shiny Umbrella &nbsp;·&nbsp; Registro de Alumnos &nbsp;·&nbsp; v1.0
+  </div>
+
+  <div class="overlay-bg" id="overlay" onclick="cerrarOverlay()">
+    <div class="overlay-box" id="overlay-box">
+      <div class="overlay-header">
+        <span class="overlay-simbolo" id="overlay-simbolo"></span>
+        <div class="overlay-titulo" id="overlay-titulo"></div>
+      </div>
+      <div class="overlay-body">
+        <div class="overlay-label" id="overlay-label">Alumno/a</div>
+        <div class="overlay-nombre" id="overlay-nombre"></div>
+        <div class="overlay-hora-box">
+          <div class="overlay-hora-label">Hora del registro</div>
+          <div class="overlay-hora" id="overlay-hora"></div>
+          <div class="overlay-fecha" id="overlay-fecha"></div>
+        </div>
+        <div class="overlay-hint">Toca para cerrar</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
