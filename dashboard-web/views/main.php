@@ -18,20 +18,7 @@ include '../includes/sidebar.php';
             <div class="card-value" id="statAlumnos">—</div>
             <div class="card-subtext">Alumnos registrados</div>
         </div>
-        <div class="card">
-            <div class="card-title">
-                <i class="fa-solid fa-rss" style="margin-right:6px;color:#10b981;"></i>Con NFC Vinculada
-            </div>
-            <div class="card-value text-green" id="statConNfc">—</div>
-            <div class="card-subtext">Tarjetas asignadas</div>
-        </div>
-        <div class="card">
-            <div class="card-title">
-                <i class="fa-solid fa-circle-exclamation" style="margin-right:6px;color:#ef4444;"></i>Sin NFC
-            </div>
-            <div class="card-value text-red" id="statSinNfc">—</div>
-            <div class="card-subtext">Pendientes de vincular</div>
-        </div>
+
         <div class="card">
             <div class="card-title">
                 <i class="fa-solid fa-chalkboard-user" style="margin-right:6px;color:#8b5cf6;"></i>Profesorado

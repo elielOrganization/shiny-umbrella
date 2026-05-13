@@ -73,9 +73,13 @@ function renderizarLogs() {
     const filas = pagina.map(log => {
         const movimiento = (log.tipo_movimiento || log.tipo || '').toLowerCase();
         const esEntrada  = movimiento.includes('entrada') || movimiento.includes('in');
-        const badge = esEntrada
-            ? `<span class="log-badge log-entrada"><i class="fa-solid fa-arrow-right-to-bracket"></i> Entrada</span>`
-            : `<span class="log-badge log-salida"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salida</span>`;
+
+        let badge;
+        if (esEntrada) {
+            badge = `<span class="log-badge log-entrada"><i class="fa-solid fa-arrow-right-to-bracket"></i> Entrada</span>`;
+        } else {
+            badge = `<span class="log-badge log-salida"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salida</span>`;
+        }
 
         const hora           = log.fecha_hora || log.hora || log.timestamp || log.fecha || '—';
         const horaFormateada = formatearHora(hora);
@@ -137,8 +141,6 @@ function formatearHora(valor) {
 function actualizarStats(alumnos, profes) {
     const conNfc = alumnos.filter(a => a.uid && a.uid !== '').length;
     document.getElementById('statAlumnos').textContent = alumnos.length;
-    document.getElementById('statConNfc').textContent  = conNfc;
-    document.getElementById('statSinNfc').textContent  = alumnos.length - conNfc;
     document.getElementById('statProfes').textContent  = profes.length;
 }
 
