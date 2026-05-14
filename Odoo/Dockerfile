@@ -9,7 +9,7 @@ RUN mkdir -p /mnt/extra-addons
 
 # Copiamos tu módulo NFC al directorio de addons de Odoo
 # OJO: Asegúrate de que tu carpeta se llama 'nfc_gestion' o cámbialo aquí
-COPY ./addons/nfc_gestion /mnt/extra-addons/nfc_gestion
+COPY ./addons/attendance_nfc /mnt/extra-addons/attendance_nfc
 
 # Copiamos el archivo de configuración personalizado
 COPY ./config/odoo.conf /etc/odoo/odoo.conf

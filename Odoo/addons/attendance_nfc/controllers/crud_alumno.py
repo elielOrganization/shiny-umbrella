@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 class NfcCrudAlumnoController(http.Controller):
 
-    @http.route('/nfc/import_alumnos', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/import_alumnos', type='json', auth='user', methods=['POST'], csrf=False)
     def import_alumnos_csv(self, **kwargs):
         # El CSV debe venir como una cadena de texto en la clave 'csv_data'
         csv_content = request.params.get('csv_data')
@@ -62,7 +62,7 @@ class NfcCrudAlumnoController(http.Controller):
             _logger.error(f"Error en la importación: {str(e)}")
             return {"status": "error", "message": f"Error procesando CSV: {str(e)}"}
     
-    @http.route('/nfc/get_alumnos', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/get_alumnos', type='json', auth='user', methods=['POST'], csrf=False)
     def get_all_alumnos(self, **kwargs):
         try:
             # Buscamos todos los alumnos y seleccionamos los campos que necesita el frontend
@@ -83,7 +83,7 @@ class NfcCrudAlumnoController(http.Controller):
             _logger.error(f"Error al obtener alumnos: {str(e)}")
             return {"status": "error", "message": "No se pudo recuperar la lista de alumnos"}
     
-    @http.route('/nfc/update_transporte', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/update_transporte', type='json', auth='user', methods=['POST'], csrf=False)
     def update_transporte(self, **kwargs):
         data = request.params
         dni = data.get("dni")
@@ -118,7 +118,7 @@ class NfcCrudAlumnoController(http.Controller):
             _logger.error(f"Error al actualizar transporte: {str(e)}")
             return {"status": "error", "message": "Error interno al actualizar el registro"}
     
-    @http.route('/nfc/create_alumno', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/create_alumno', type='json', auth='user', methods=['POST'], csrf=False)
     def create_alumno(self, **kwargs):
         data = request.params
         dni = data.get('dni')
