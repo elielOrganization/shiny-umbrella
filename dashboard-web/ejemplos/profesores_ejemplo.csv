@@ -1,21 +1,21 @@
 nombre,apellido,dni,fecha_nacimiento,departamento
-Andreína,Rodríguez Salcedo,12345678A,1985-03-15,Matemáticas
-Yolanda,Pérez Fuenmayor,23456789B,1979-07-22,Lengua
-Jesús,Gutiérrez Añez,34567890C,1990-11-05,Historia
-Marisol,Hernández Briceño,45678901D,1982-04-18,Ciencias
-Wilmer,Colmenares Rujano,56789012E,1975-09-30,Inglés
-Luisana,Vegas Montilla,67890123F,1988-12-01,Educación Física
-Reinaldo,Díaz Castellanos,78901234G,1993-05-14,Tecnología
-Yuleima,Bastidas Urdaneta,89012345H,1980-08-27,Arte
-Oswaldo,Rondón Zerpa,90123456J,1986-02-09,Música
-Carmelita,Tovar Chirinos,01234567K,1977-06-13,Filosofía
-Xiomara,Medina Delgado,11223344L,1991-01-20,Matemáticas
-Freddy,Quintero Mavares,22334455M,1984-03-08,Lengua
-Yajaira,Baptista Lunar,33445566N,1978-10-17,Historia
-Héctor,Parra Useche,44556677P,1987-05-25,Ciencias
-Milagros,Sequera Bonilla,55667788Q,1992-08-11,Inglés
-Argenis,Sulbarán Pinto,66778899R,1976-07-04,Educación Física
-Norelys,Ferrer Añez,77889900S,1983-04-29,Tecnología
-Yelitze,Barrios Montoya,88990011T,1989-02-16,Arte
-Geomar,Acosta Villasmil,99001122U,1974-12-03,Música
-Tibisay,Navas Espinoza,10203040V,1994-06-07,Filosofía
+Andreína,Rodríguez Salcedo,51234567A,1985-03-15,Matemáticas
+Yolanda,Pérez Fuenmayor,52345678B,1979-07-22,Lengua
+Jesús,Gutiérrez Añez,53456789C,1990-11-05,Historia
+Marisol,Hernández Briceño,54567890D,1982-04-18,Ciencias
+Wilmer,Colmenares Rujano,55678901E,1975-09-30,Inglés
+Luisana,Vegas Montilla,56789012F,1988-12-01,Educación Física
+Reinaldo,Díaz Castellanos,57890123G,1993-05-14,Tecnología
+Yuleima,Bastidas Urdaneta,58901234H,1980-08-27,Arte
+Oswaldo,Rondón Zerpa,59012345J,1986-02-09,Música
+Carmelita,Tovar Chirinos,50123456K,1977-06-13,Filosofía
+Xiomara,Medina Delgado,61223344L,1991-01-20,Matemáticas
+Freddy,Quintero Mavares,62334455M,1984-03-08,Lengua
+Yajaira,Baptista Lunar,63445566N,1978-10-17,Historia
+Héctor,Parra Useche,64556677P,1987-05-25,Ciencias
+Milagros,Sequera Bonilla,65667788Q,1992-08-11,Inglés
+Argenis,Sulbarán Pinto,76778899R,1976-07-04,Educación Física
+Norelys,Ferrer Añez,67889900S,1983-04-29,Tecnología
+Yelitze,Barrios Montoya,68990011T,1989-02-16,Arte
+Geomar,Acosta Villasmil,69001122U,1974-12-03,Música
+Tibisay,Navas Espinoza,60112233V,1994-06-07,Filosofía

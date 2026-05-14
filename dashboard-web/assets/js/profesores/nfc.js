@@ -20,7 +20,7 @@ window.prepararAsignacionNFCProf = function(btn) {
             const res = await apiFetch(GLOBALS.URL_ASSIGN_CARD, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ uid, dni })
+                body:    JSON.stringify({ uid, dni, tipo: 'profesor' })
             }).then(r => r.json());
             if (res.status === 'error') throw new Error(res.message || 'Error al vincular');
             return res;

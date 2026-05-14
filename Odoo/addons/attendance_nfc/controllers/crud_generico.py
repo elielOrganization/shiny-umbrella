@@ -30,22 +30,20 @@ class NfcCrudGenericoController(http.Controller):
 
             if tarjeta.activo:
                 return {
-                    "status": "error", 
+                    "status": "error",
                     "message": "La tarjeta ya está activa."
                 }
 
-            # 2. Identificar al sujeto (Prioridad Profesores por eficiencia)
-            # Buscamos en nfc.profesor
-            sujeto = request.env['nfc.profesor'].sudo().search([('dni', '=', dni)], limit=1)
-            tipo = "profesor"
+            # 2. Identificar al sujeto usando el tipo enviado por el frontend
+            tipo = data.get("tipo", "alumno")   # 'alumno' | 'profesor'
 
-            if not sujeto:
-                # Si no es profesor, buscamos en nfc.alumno
+            if tipo == "profesor":
+                sujeto = request.env['nfc.profesor'].sudo().search([('dni', '=', dni)], limit=1)
+            else:
                 sujeto = request.env['nfc.alumno'].sudo().search([('dni', '=', dni)], limit=1)
-                tipo = "alumno"
 
             if not sujeto:
-                return {"status": "error", "message": "No se ha encontrado ese DNI"}
+                return {"status": "error", "message": f"No se encontró ningún {tipo} con ese DNI"}
 
             # 3. Operaciones de vinculación mediante el ORM
             # Activamos la tarjeta física

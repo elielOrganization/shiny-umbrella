@@ -8,8 +8,9 @@ require_once __DIR__ . '/../includes/auth_api.php';
 $data = json_decode(file_get_contents('php://input'), true);
 
 $result = odoo_call('/nfc/assign_card', [
-    'uid' => $data['uid'] ?? '',
-    'dni' => $data['dni'] ?? '',
+    'uid'  => $data['uid']  ?? '',
+    'dni'  => $data['dni']  ?? '',
+    'tipo' => $data['tipo'] ?? 'alumno',   // 'alumno' | 'profesor'
 ]);
 odoo_require_auth($result);
 

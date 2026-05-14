@@ -9,7 +9,7 @@ const AlumnosAPI = {
             const response = await apiFetch(GLOBALS.URL_ASSIGN_CARD, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid, dni })
+                body: JSON.stringify({ uid, dni, tipo: 'alumno' })
             });
             
             const data = await response.json();

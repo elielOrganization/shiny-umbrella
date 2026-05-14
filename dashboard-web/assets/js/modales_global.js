@@ -212,8 +212,9 @@ window.Modales = (function () {
                     setColor('#10b981');
 
                     setTimeout(() => {
+                        const cb = _onSuccess;
                         cerrarVincularNfc();
-                        if (_onSuccess) _onSuccess();
+                        if (cb) cb();
                     }, 2000);
 
                 } catch (err) {
