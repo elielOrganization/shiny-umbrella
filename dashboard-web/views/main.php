@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/auth.php';
 $pageTitle = "Dashboard Escolar";
 include '../includes/header.php';
 include '../includes/sidebar.php';
@@ -28,11 +29,14 @@ include '../includes/sidebar.php';
         </div>
     </div>
 
-    <!-- Gráfico distribución por curso -->
+    <!-- Gráfico entradas por día de la semana -->
     <div class="chart-container">
-        <div class="section-header">
-            <i class="fa-solid fa-chart-simple" style="font-size:0.9rem;color:#6b7280;margin-right:10px;"></i>
-            Alumnado por Curso
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>
+                <i class="fa-solid fa-chart-simple" style="font-size:0.9rem;color:#6b7280;margin-right:10px;"></i>
+                Actividad — semana actual
+            </span>
+            <span id="chartRangeLabel" style="font-size:0.78rem;color:#9ca3af;font-weight:500;"></span>
         </div>
         <div class="chart-area" id="courseChart">
             <div class="table-main-loader" id="chartLoader" style="display:flex;align-items:center;gap:10px;padding:20px;">

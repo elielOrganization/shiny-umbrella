@@ -122,16 +122,20 @@ window.UI_NFC = {
     },
 
     abrirModalEliminar: function(uid) {
-        const modal = document.getElementById('deleteNfcModal');
-        if (!modal) return;
-        document.getElementById('deleteNfcUidText').textContent = uid;
-        document.getElementById('btnConfirmDeleteNfc').setAttribute('data-uid', uid);
-        modal.classList.add('show');
+        Modales.abrirEliminar({
+            titulo:   '¿Eliminar tarjeta?',
+            cuerpo:   `Esta acción eliminará permanentemente la tarjeta <strong style="color:#ef4444;font-family:monospace;">${uid}</strong> de la base de datos.`,
+            btnTexto: 'Sí, eliminar',
+            onConfirm: async () => {
+                const res = await API_NFC.eliminar(uid);
+                if (res.status !== 'ok') throw new Error(res.message || 'Error al eliminar');
+                Modales.cerrarEliminar();
+                await window.recargarTablaNfc();
+            }
+        });
     },
 
-    cerrarModalEliminar: function() {
-        document.getElementById('deleteNfcModal')?.classList.remove('show');
-    },
+    cerrarModalEliminar: function() { Modales.cerrarEliminar(); },
 
     notificarModal: function(mensaje, tipo) {
         const statusMsg = document.getElementById('nfc-status-msg');
@@ -150,12 +154,16 @@ window.UI_NFC = {
     },
 
     abrirModalDesvincular: function(uid) {
-        document.getElementById('unlinkNfcUidText').textContent = uid;
-        document.getElementById('btnConfirmUnlinkNfc').setAttribute('data-uid', uid);
-        document.getElementById('unlinkNfcModal').classList.add('show');
+        Modales.abrirDesvincular({
+            cuerpo:   `La tarjeta <strong style="color:#d97706;font-family:monospace;">${uid}</strong> dejará de estar operativa pero se mantendrá en el sistema.`,
+            onConfirm: async () => {
+                const res = await API_NFC.desvincular(uid);
+                if (res.status !== 'ok') throw new Error(res.message || 'Error al desvincular');
+                Modales.cerrarDesvincular();
+                await window.recargarTablaNfc();
+            }
+        });
     },
 
-    cerrarModalDesvincular: function() {
-        document.getElementById('unlinkNfcModal').classList.remove('show');
-    }
+    cerrarModalDesvincular: function() { Modales.cerrarDesvincular(); }
 };

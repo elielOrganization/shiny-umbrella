@@ -1,12 +1,12 @@
 const AlumnosAPI = {
     async getAlumnos() {
-        const response = await fetch(GLOBALS.URL_GET_ALUMNOS);
+        const response = await apiFetch(GLOBALS.URL_GET_ALUMNOS);
         return response.json();
     },
 
     async assignCard(uid, dni) {
         try {
-            const response = await fetch(GLOBALS.URL_ASSIGN_CARD, {
+            const response = await apiFetch(GLOBALS.URL_ASSIGN_CARD, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid, dni })
@@ -29,7 +29,7 @@ const AlumnosAPI = {
     },
 
     async updateTransporte(dni, valor) {
-        const response = await fetch(GLOBALS.URL_UPDATE_TRANSPORTE, {
+        const response = await apiFetch(GLOBALS.URL_UPDATE_TRANSPORTE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dni, valor })
@@ -38,7 +38,7 @@ const AlumnosAPI = {
     },
 
     async updateEstado(dni, valor) {
-        const response = await fetch(GLOBALS.URL_UPDATE_ESTADO, {
+        const response = await apiFetch(GLOBALS.URL_UPDATE_ESTADO, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dni, valor })
@@ -47,7 +47,7 @@ const AlumnosAPI = {
     },
 
     async updateAlumno(datos) {
-        const response = await fetch(GLOBALS.URL_UPDATE_PROFESOR, {
+        const response = await apiFetch(GLOBALS.URL_UPDATE_PROFESOR, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -56,7 +56,7 @@ const AlumnosAPI = {
     },
 
     async deleteAlumno(dni) {
-        const response = await fetch(GLOBALS.URL_DELETE_PERSONA, {
+        const response = await apiFetch(GLOBALS.URL_DELETE_PERSONA, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dni })

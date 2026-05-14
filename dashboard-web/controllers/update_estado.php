@@ -1,56 +1,22 @@
 <?php
-// controllers/update_estado.php
-require_once __DIR__ . '/../config/odoo.php';
+require_once __DIR__ . '/../includes/auth_api.php';
 header('Content-Type: application/json');
-
 error_reporting(0);
 ini_set('display_errors', 0);
 
 try {
-    $inputJSON = file_get_contents('php://input');
-    $input = json_decode($inputJSON, true);
-
-    $dni   = $input['dni'] ?? null;
+    $input = json_decode(file_get_contents('php://input'), true);
+    $dni   = $input['dni']   ?? null;
     $valor = $input['valor'] ?? false;
 
-    if (!$dni) {
-        throw new Exception('DNI no recibido');
-    }
+    if (!$dni) throw new Exception('DNI no recibido');
 
-    $odoo_url = $ODOO_BASE . "/nfc/update_estado_profesor";
+    $result = odoo_call('/nfc/update_estado_profesor', ['dni' => $dni, 'estado' => $valor]);
+    odoo_require_auth($result);
 
-    $payload = json_encode([
-        "jsonrpc" => "2.0",
-        "method" => "call",
-        "params" => [
-            "dni"   => $dni,
-            "estado" => $valor
-        ]
-    ]);
-
-    $options = [
-        'http' => [
-            'header'  => "Content-Type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => $payload,
-            'ignore_errors' => true
-        ]
-    ];
-
-    $context  = stream_context_create($options);
-    $response = file_get_contents($odoo_url, false, $context);
-
-    if ($response === FALSE) {
-        throw new Exception('Error de conexiÃ³n con Odoo');
-    }
-
-    echo $response;
+    if ($result['body'] === null) throw new Exception('Error de conexión con Odoo');
+    echo $result['body'];
 
 } catch (Exception $e) {
-    echo json_encode([
-        "jsonrpc" => "2.0",
-        "error" => [
-            "data" => ["message" => $e->getMessage()]
-        ]
-    ]);
+    echo json_encode(['jsonrpc' => '2.0', 'error' => ['data' => ['message' => $e->getMessage()]]]);
 }

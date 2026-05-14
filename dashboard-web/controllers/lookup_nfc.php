@@ -1,34 +1,41 @@
 <?php
+// lookup_nfc.php — endpoint PÚBLICO: el escáner NFC global lo usa sin sesión PHP
 require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
 
-$json  = file_get_contents('php://input');
-$data  = json_decode($json, true);
-$uid   = $data['uid'] ?? '';
+$data = json_decode(file_get_contents('php://input'), true);
+$uid  = trim($data['uid'] ?? '');
 
 if (!$uid) {
     echo json_encode(['error' => 'UID no proporcionado']);
     exit;
 }
 
-$payload = json_encode([
-    "jsonrpc" => "2.0",
-    "method"  => "call",
-    "params"  => ["uid" => $uid]
-]);
+// Usa odoo_call() del config — incluirá el sessionid si hay sesión activa
+$rAlumnos    = odoo_call('/nfc/get_alumnos');
+$rProfesores = odoo_call('/nfc/get_profesores');
 
-$context = stream_context_create(['http' => [
-    'header'        => "Content-Type: application/json\r\n",
-    'method'        => 'POST',
-    'content'       => $payload,
-    'ignore_errors' => true,
-    'timeout'       => 6
-]]);
+$alumnos    = $rAlumnos['data']['result']['alumnos']       ?? [];
+$profesores = $rProfesores['data']['result']['profesores'] ?? [];
 
-$response = @file_get_contents($ODOO_BASE . "/nfc/lookup_uid", false, $context);
-
-if ($response === false) {
-    echo json_encode(['error' => 'No se pudo conectar con Odoo']);
-} else {
-    echo $response;
+foreach ($alumnos as $a) {
+    if (isset($a['uid']) && $a['uid'] === $uid) {
+        echo json_encode([
+            'nombre' => trim(($a['nombre'] ?? '') . ' ' . ($a['apellido'] ?? '')),
+            'tipo'   => 'alumno',
+        ]);
+        exit;
+    }
 }
+
+foreach ($profesores as $p) {
+    if (isset($p['uid']) && $p['uid'] === $uid) {
+        echo json_encode([
+            'nombre' => trim(($p['nombre'] ?? '') . ' ' . ($p['apellido'] ?? '')),
+            'tipo'   => 'profesor',
+        ]);
+        exit;
+    }
+}
+
+echo json_encode(['error' => true, 'message' => 'Tarjeta no vinculada a ninguna persona']);

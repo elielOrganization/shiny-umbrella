@@ -92,6 +92,7 @@
 }
 </style>
 
+<script src="../assets/js/api_fetch.js"></script>
 <script>
     const NFC_LOOKUP_URL = '<?php echo "../controllers/lookup_nfc.php"; ?>';
 </script>

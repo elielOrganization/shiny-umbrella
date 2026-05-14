@@ -154,12 +154,18 @@ window.UI_Profesores = {
 
     // --- MODAL ELIMINAR ---
     abrirModalEliminar: function(dni, nombreCompleto) {
-        const btnConfirmar = document.getElementById('btnConfirmDeleteProf');
-        if (btnConfirmar) btnConfirmar.setAttribute('data-dni', dni);
-        document.getElementById('deleteProfName').textContent = nombreCompleto;
-        document.getElementById('deleteConfirmModal').classList.add('show');
+        Modales.abrirEliminar({
+            titulo:   '¿Eliminar profesor?',
+            cuerpo:   `Esta acción eliminará permanentemente a <strong style="color:#ef4444;">${nombreCompleto}</strong> de la base de datos de Odoo.`,
+            btnTexto: 'Eliminar Profesor',
+            onConfirm: async () => {
+                await API_Profesores.eliminar(dni);
+                Modales.cerrarEliminar();
+                if (typeof window.fetchProfesores === 'function') window.fetchProfesores();
+            }
+        });
     },
-    cerrarModalEliminar: () => document.getElementById('deleteConfirmModal').classList.remove('show'),
+    cerrarModalEliminar: () => Modales.cerrarEliminar(),
 
     // --- MODAL CSV ---
     abrirModalCSV: () => {

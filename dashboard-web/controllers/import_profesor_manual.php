@@ -1,54 +1,25 @@
 <?php
-require_once __DIR__ . '/../config/odoo.php';
+require_once __DIR__ . '/../includes/auth_api.php';
 header('Content-Type: application/json');
 error_reporting(0);
 ini_set('display_errors', 0);
 
 try {
-    $inputJSON = file_get_contents('php://input');
-    $input = json_decode($inputJSON, true);
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!$input) throw new Exception('No se recibieron datos.');
 
-    if (!$input) {
-        throw new Exception("No se recibieron datos en el servidor local.");
-    }
-
-    $odoo_url = $ODOO_BASE . "/nfc/create_profesor";
-
-    $payload = json_encode([
-        "jsonrpc" => "2.0",
-        "method" => "call",
-        "params" => [
-            "nombre"           => $input['nombre'] ?? '',
-            "apellido"        => $input['apellidos'] ?? '',
-            "dni"              => $input['dni'] ?? '',
-            "fecha_nacimiento" => $input['fecha_nacimiento'] ?? '',
-            "departamento"      => $input['departamento'] ?? ''
-        ]
+    $result = odoo_call('/nfc/create_profesor', [
+        'nombre'           => $input['nombre']           ?? '',
+        'apellido'         => $input['apellidos']        ?? '',
+        'dni'              => $input['dni']              ?? '',
+        'fecha_nacimiento' => $input['fecha_nacimiento'] ?? '',
+        'departamento'     => $input['departamento']     ?? '',
     ]);
+    odoo_require_auth($result);
 
-    // 5. PeticiÃ³n POST
-    $options = [
-        'http' => [
-            'header'  => "Content-Type: application/json\r\n",
-            'method'  => 'POST',
-            'content' => $payload,
-            'ignore_errors' => true 
-        ]
-    ];
-
-    $context  = stream_context_create($options);
-    $response = file_get_contents($odoo_url, false, $context);
-
-    if ($response === FALSE) {
-        throw new Exception("Error de conexiÃ³n con Odoo.");
-    }
-
-    // Devolvemos la respuesta de Odoo (status, message, id)
-    echo $response;
+    if ($result['body'] === null) throw new Exception('Error de conexión con Odoo.');
+    echo $result['body'];
 
 } catch (Exception $e) {
-    echo json_encode([
-        "jsonrpc" => "2.0",
-        "error" => ["data" => ["message" => $e->getMessage()]]
-    ]);
+    echo json_encode(['jsonrpc' => '2.0', 'error' => ['data' => ['message' => $e->getMessage()]]]);
 }

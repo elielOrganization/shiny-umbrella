@@ -1,20 +1,21 @@
 // assets/js/main.js
 
-const CURSOS_ORDEN  = ['1º ESO', '2º ESO', '3º ESO', '4º ESO', '1º BACH', '2º BACH'];
-const CURSOS_LABELS = { '1º ESO':'1ºE', '2º ESO':'2ºE', '3º ESO':'3ºE', '4º ESO':'4ºE', '1º BACH':'1ºB', '2º BACH':'2ºB' };
-
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const [resAlumnos, resProfes] = await Promise.all([
-            fetch(GLOBALS.URL_GET_ALUMNOS).then(r => r.json()),
-            fetch(GLOBALS.URL_GET_PROFESORES).then(r => r.json())
+        const [resAlumnos, resProfes, resLogsProf, resLogsAlum] = await Promise.all([
+            apiFetch(GLOBALS.URL_GET_ALUMNOS).then(r => r.json()),
+            apiFetch(GLOBALS.URL_GET_PROFESORES).then(r => r.json()),
+            apiFetch(GLOBALS.URL_GET_LOGS + '?tipo=profesor').then(r => r.json()),
+            apiFetch(GLOBALS.URL_GET_LOGS + '?tipo=alumno').then(r => r.json())
         ]);
 
-        const alumnos = resAlumnos.result?.alumnos   || [];
-        const profes  = resProfes.result?.profesores || [];
+        const alumnos    = resAlumnos.result?.alumnos   || [];
+        const profes     = resProfes.result?.profesores || [];
+        const logsProf   = resLogsProf.result?.fichajes || [];
+        const logsAlum   = resLogsAlum.result?.fichajes || [];
 
         actualizarStats(alumnos, profes);
-        renderizarGrafico(alumnos);
+        renderizarGrafico([...logsProf, ...logsAlum]);
 
     } catch (e) {
         console.error('Error cargando stats:', e);
@@ -45,7 +46,7 @@ window.cargarLogs = async function (tipo) {
     if (loader) loader.style.display = '';
 
     try {
-        const res  = await fetch(GLOBALS.URL_GET_LOGS + '?tipo=' + tipo).then(r => r.json());
+        const res  = await apiFetch(GLOBALS.URL_GET_LOGS + '?tipo=' + tipo).then(r => r.json());
         logsCache  = res.result?.fichajes || res.result?.logs || res.result || [];
         logsPagina = 1;
         renderizarLogs();
@@ -144,28 +145,65 @@ function actualizarStats(alumnos, profes) {
     document.getElementById('statProfes').textContent  = profes.length;
 }
 
-function renderizarGrafico(alumnos) {
-    const conteo = {};
-    CURSOS_ORDEN.forEach(c => conteo[c] = 0);
+function semanaActual() {
+    const hoy = new Date();
+    const dow  = hoy.getDay(); // 0=Dom … 6=Sáb
+    const diff = (dow === 0) ? -6 : 1 - dow; // retroceder hasta el lunes
+    const lunes = new Date(hoy);
+    lunes.setDate(hoy.getDate() + diff);
+    lunes.setHours(0, 0, 0, 0);
 
-    alumnos.forEach(a => {
-        const g     = (a.grupo_clase || '').trim();
-        const curso = CURSOS_ORDEN.find(c => g.startsWith(c));
-        if (curso) conteo[curso]++;
+    return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(lunes);
+        d.setDate(lunes.getDate() + i);
+        return d;
+    });
+}
+
+function renderizarGrafico(logs) {
+    const DIAS_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const dias        = semanaActual();
+    const conteo      = Array(7).fill(0);
+
+    // Mostrar rango en el header: "12 May — 18 May"
+    const fmt = d => d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+    const rangeEl = document.getElementById('chartRangeLabel');
+    if (rangeEl) rangeEl.textContent = `${fmt(dias[0])} — ${fmt(dias[6])}`;
+
+    // Contar solo entradas de la semana actual agrupadas por día
+    const soloEntradas = logs.filter(log => {
+        const mov = (log.tipo_movimiento || log.tipo || '').toLowerCase();
+        return mov.includes('entrada') || mov.includes('in');
     });
 
-    const max    = Math.max(...Object.values(conteo), 1);
-    const chart  = document.getElementById('courseChart');
+    soloEntradas.forEach(log => {
+        const fecha = log.fecha_hora || log.hora || log.timestamp || '';
+        if (!fecha) return;
+        const d = new Date(fecha);
+        if (isNaN(d)) return;
+        dias.forEach((diaRef, i) => {
+            const inicio = new Date(diaRef); inicio.setHours(0,  0,  0,   0);
+            const fin    = new Date(diaRef); fin.setHours(23, 59, 59, 999);
+            if (d >= inicio && d <= fin) conteo[i]++;
+        });
+    });
 
-    chart.innerHTML = CURSOS_ORDEN.map(curso => {
-        const pct = Math.round((conteo[curso] / max) * 100);
+    const max   = Math.max(...conteo, 1);
+    const hoy   = new Date();
+    const chart = document.getElementById('courseChart');
+
+    chart.innerHTML = dias.map((dia, i) => {
+        const pct      = Math.round((conteo[i] / max) * 100);
+        const esHoy    = dia.toDateString() === hoy.toDateString();
+        const colorFill = esHoy ? '#3b82f6' : '#93c5fd';
+        const colorText = esHoy ? '#1d4ed8' : '#374151';
         return `
         <div class="bar-group">
-            <div style="font-size:0.75rem;font-weight:700;color:#374151;margin-bottom:6px;">${conteo[curso]}</div>
+            <div style="font-size:0.75rem;font-weight:700;color:${colorText};margin-bottom:6px;">${conteo[i]}</div>
             <div class="bar-track">
-                <div class="bar-fill" style="height:${pct}%"></div>
+                <div class="bar-fill" style="height:${pct}%;background:${colorFill};"></div>
             </div>
-            <span class="bar-label">${CURSOS_LABELS[curso]}</span>
+            <span class="bar-label" style="${esHoy ? 'color:#3b82f6;font-weight:700;' : ''}">${DIAS_LABELS[i]}</span>
         </div>`;
     }).join('');
 }

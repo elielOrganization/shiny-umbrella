@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryHTML += '</ul>';
 
             // Enviar a Odoo vía PHP
-            fetch(GLOBALS.URL_IMPORT_ALUMNO_CSV, {
+            apiFetch(GLOBALS.URL_IMPORT_ALUMNO_CSV, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ csv_content: csvContent })
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
-            fetch(GLOBALS.URL_IMPORT_ALUMNO_MANUAL, {
+            apiFetch(GLOBALS.URL_IMPORT_ALUMNO_MANUAL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosAEnviar)

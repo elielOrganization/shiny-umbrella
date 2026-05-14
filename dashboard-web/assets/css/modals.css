@@ -147,37 +147,7 @@
     color: var(--success-green);
 }
 
-/* Animación Giro Básico */
-.spinning {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Animación Error */
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    75% {
-        transform: translateX(5px);
-    }
-}
+/* .spinning, @keyframes spin, @keyframes shake → defined in base.css */
 
 /* --- RESUMEN IMPORTACIÓN --- */
 .import-summary {
@@ -216,44 +186,8 @@
 }
 
 /* --- MODAL NFC --- */
-#nfcModal {
-    z-index: 1000;
-}
-
 #nfcOverwriteModal {
     z-index: 1300 !important;
-}
-
-.nfc-icon-container {
-    height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    color: var(--primary-blue);
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-.nfc-wave {
-    animation: pulse-fade 1.5s infinite;
-}
-
-@keyframes pulse-fade {
-    0% {
-        opacity: 0.2;
-        transform: scale(0.8);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.1);
-    }
-
-    100% {
-        opacity: 0.2;
-        transform: scale(0.8);
-    }
 }
 
 #oldScanValue {
@@ -338,62 +272,6 @@
 .form-group select:focus {
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Estilos específicos para el modal de confirmación */
-.modal-confirm {
-    max-width: 400px;
-    text-align: center;
-    padding: 30px;
-}
-
-.confirm-icon {
-    font-size: 3rem;
-    color: #ef4444;
-    margin-bottom: 15px;
-}
-
-.confirm-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 25px;
-    justify-content: center;
-}
-
-.btn-danger {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-danger:hover { background-color: #dc2626; }
-
-.btn-unlink-confirm {
-    background-color: #f59e0b;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-unlink-confirm:hover { background-color: #d97706; }
-
-.btn-secondary {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
 }
 
 /* En móviles, que sea una sola columna */
@@ -516,4 +394,43 @@
     transition: color 0.2s;
 }
 .close-modal-btn:hover { color: #334155; }
+
+/* --- ICONO NFC PULSANTE --- */
+.pulse-nfc-icon {
+    font-size: 3.5rem;
+    color: #3b82f6;
+    margin-bottom: 18px;
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1);    opacity: 1;   }
+    50%       { transform: scale(1.15); opacity: 0.65; }
+}
+
+#nfc-status-msg { min-height: 42px; font-weight: 600; }
+
+/* Imagen de estado dentro del modal de vincular NFC */
+.status-img-nfc {
+    width: 85px;
+    max-width: 85px;
+    height: auto;
+    display: none;
+}
+
+/* Contenedor del icono/imagen en el modal de vincular */
+.nfc-icon-container {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.msg-success { color: #10b981; }
+.msg-error   { color: #ef4444; }
+
+/* .spinning-umbrella animation uses @keyframes spin from base.css */
+.spinning-umbrella { animation: spin 2s linear infinite; }
 

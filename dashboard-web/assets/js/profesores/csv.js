@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryHTML += '</ul>';
 
             // Enviar al PHP
-            fetch('../controllers/import_prof_csv.php', {
+            apiFetch('../controllers/import_prof_csv.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ csv_content: content })
