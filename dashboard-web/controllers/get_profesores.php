@@ -1,8 +1,12 @@
 <?php
-require_once __DIR__ . '/../includes/auth_api.php';
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
+require_once __DIR__ . '/../includes/auth_api.php';
 
 $result = odoo_call('/nfc/get_profesores');
 odoo_require_auth($result);
 
-echo $result['body'] ?? json_encode(['error' => 'No se pudo conectar con Odoo']);
+ob_end_clean();
+echo odoo_json_body($result);

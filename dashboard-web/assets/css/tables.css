@@ -60,6 +60,13 @@
     grid-template-columns: 1.8fr 1fr 1fr 1fr 80px 120px;
 }
 
+/* Grid de departamentos en el filtro de profesores */
+.dep-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
 /* Layout DASHBOARD MAIN (6 columnas: Datos + Permisos) */
 .table-grid-main {
     grid-template-columns: minmax(180px, 2fr) 1fr 1.4fr 80px 80px 110px;

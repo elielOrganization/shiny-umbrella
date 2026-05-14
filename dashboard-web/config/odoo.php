@@ -1,5 +1,5 @@
 <?php
-$ODOO_IP   = "10.102.6.225";
+$ODOO_IP   = "10.102.6.212";
 $ODOO_PORT = "8069";
 $ODOO_BASE = "http://{$ODOO_IP}:{$ODOO_PORT}";
 $ODOO_DB   = "odoo";
@@ -75,19 +75,53 @@ function odoo_call(string $endpoint, array $params = []): array
 
 /* ─────────────────────────────────────────────────────────────────────────
    odoo_require_auth()
-   Llama a esto después de odoo_call(). Si Odoo devuelve 401 limpia la
-   sesión PHP y responde con JSON 401 para que el JS redirija al login.
+   Detecta sesión expirada tanto por HTTP 401 como por el error JSON-RPC
+   de Odoo (code 100 / SessionExpiredException). Limpia la sesión PHP y
+   responde con HTTP 401 JSON para que apiFetch.js redirija al login.
    ───────────────────────────────────────────────────────────────────────── */
 function odoo_require_auth(array $result): void
 {
-    if ($result['http_code'] === 401) {
+    $httpExpired  = $result['http_code'] === 401;
+    $odooExpired  = isset($result['data']['error']['code'])
+                    && $result['data']['error']['code'] === 100;
+
+    if ($httpExpired || $odooExpired) {
         session_unset();
         session_destroy();
+
+        // Limpiar cualquier output bufferado antes de emitir la respuesta
+        if (ob_get_level() > 0) ob_end_clean();
+
         http_response_code(401);
+        header('Content-Type: application/json');
         echo json_encode([
             'error'   => 'unauthorized',
             'message' => 'Sesión expirada. Por favor, inicia sesión de nuevo.',
         ]);
         exit;
     }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   odoo_json_body()
+   Valida que la respuesta de Odoo sea JSON antes de reenviarla al cliente.
+   Si Odoo devuelve HTML (error interno, página de mantenimiento, etc.)
+   lanza una excepción con mensaje legible en lugar de reenviar el HTML.
+   ───────────────────────────────────────────────────────────────────────── */
+function odoo_json_body(array $result): string
+{
+    if ($result['body'] === null) {
+        throw new RuntimeException('Sin respuesta de Odoo. Comprueba la conexión.');
+    }
+
+    $first = ltrim($result['body'])[0] ?? '';
+    if ($first !== '{' && $first !== '[') {
+        odoo_log('odoo_json_body', 'Odoo devolvió respuesta no-JSON', [
+            'http_code' => $result['http_code'],
+            'preview'   => substr($result['body'], 0, 120),
+        ]);
+        throw new RuntimeException('Odoo devolvió una respuesta inesperada (no JSON).');
+    }
+
+    return $result['body'];
 }

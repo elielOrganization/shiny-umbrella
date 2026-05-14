@@ -1,4 +1,7 @@
 <?php
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
 // lookup_nfc.php — endpoint PÚBLICO: el escáner NFC global lo usa sin sesión PHP
 require_once __DIR__ . '/../config/odoo.php';
 header('Content-Type: application/json');
@@ -7,6 +10,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 $uid  = trim($data['uid'] ?? '');
 
 if (!$uid) {
+    ob_end_clean();
     echo json_encode(['error' => 'UID no proporcionado']);
     exit;
 }
@@ -20,6 +24,7 @@ $profesores = $rProfesores['data']['result']['profesores'] ?? [];
 
 foreach ($alumnos as $a) {
     if (isset($a['uid']) && $a['uid'] === $uid) {
+        ob_end_clean();
         echo json_encode([
             'nombre' => trim(($a['nombre'] ?? '') . ' ' . ($a['apellido'] ?? '')),
             'tipo'   => 'alumno',
@@ -30,6 +35,7 @@ foreach ($alumnos as $a) {
 
 foreach ($profesores as $p) {
     if (isset($p['uid']) && $p['uid'] === $uid) {
+        ob_end_clean();
         echo json_encode([
             'nombre' => trim(($p['nombre'] ?? '') . ' ' . ($p['apellido'] ?? '')),
             'tipo'   => 'profesor',
@@ -38,4 +44,5 @@ foreach ($profesores as $p) {
     }
 }
 
+ob_end_clean();
 echo json_encode(['error' => true, 'message' => 'Tarjeta no vinculada a ninguna persona']);

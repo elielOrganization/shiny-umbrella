@@ -14,6 +14,7 @@ const GLOBALS = {
     URL_IMPORT_ALUMNO_MANUAL:      '../controllers/import_alumno_manual.php',
 
     URL_IMPORT_PROFESOR_CSV:      '../controllers/import_profesor.php',
+    URL_UPLOAD_CSV_PROFESOR:      '../controllers/import_profesor.php',
     URL_IMPORT_PROFESOR_MANUAL:      '../controllers/import_profesor_manual.php',
     URL_UPDATE_PROFESOR:    '../controllers/update_profesor.php',
 

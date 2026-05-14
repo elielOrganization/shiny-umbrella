@@ -54,14 +54,23 @@ window.API_Profesores = {
     /**
      * Sube y procesa un archivo CSV con profesores.
      */
-    subirCSV: async function(archivo) {
-        const formData = new FormData();
-        formData.append('csv_file', archivo);
+    // Acepta un File o directamente el texto del CSV (para evitar doble lectura)
+    subirCSV: async function(archivoOTexto) {
+        const csvContent = (typeof archivoOTexto === 'string')
+            ? archivoOTexto
+            : await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload  = e => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+                reader.readAsText(archivoOTexto);
+              });
 
         const response = await apiFetch(GLOBALS.URL_UPLOAD_CSV_PROFESOR, {
             method: 'POST',
-            body: formData // No ponemos Content-Type, el navegador lo calcula al usar FormData
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ csv_content: csvContent })
         });
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
         const data = await response.json();
         this._validarErrores(data);
         return data.result;
