@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -35,10 +36,14 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    enum class ModoEscaneo { RECREO, TRANSPORTE, NINGUNO }
+    enum class ModoEscaneo(val endpoint: String, val campo: String, val label: String) {
+        RECREO("check_recreo", "permiso_recreo", "RECREO"),
+        TRANSPORTE("check_transporte", "permiso_transporte", "TRANSPORTE"),
+        NINGUNO("", "", "")
+    }
 
     companion object {
-        private const val SERVER_IP = "10.102.6.225"
+        private const val SERVER_IP = "10.102.6.212"
     }
 
     data class ResultadoOdoo(
@@ -80,7 +85,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupAnimations() {
         binding.logoUmbrella.apply {
-
             scaleX = 0f
             scaleY = 0f
             alpha = 0f
@@ -103,8 +107,7 @@ class MainActivity : AppCompatActivity() {
                 .start()
         }
 
-        val buttons = listOf(binding.btnRecreo, binding.btnTransporte)
-        buttons.forEachIndexed { index, view ->
+        listOf(binding.btnRecreo, binding.btnTransporte).forEachIndexed { index, view ->
             view.alpha = 0f
             view.translationY = 90f
             view.animate()
@@ -202,40 +205,32 @@ class MainActivity : AppCompatActivity() {
     private fun procesarLecturaNFC(uidTag: String) {
         lifecycleScope.launch {
             val startTime = System.currentTimeMillis()
+            val resultado = realizarPeticionOdoo(uidTag, modoActual.endpoint, modoActual.campo)
 
-            val endpoint = if (modoActual == ModoEscaneo.RECREO) "check_recreo" else "check_transporte"
-            val campoPermiso = if (modoActual == ModoEscaneo.RECREO) "permiso_recreo" else "permiso_transporte"
-
-            val resultado = realizarPeticionOdoo(uidTag, endpoint, campoPermiso)
-
-            val elapsedTime = System.currentTimeMillis() - startTime
-            if (elapsedTime < 1500) delay(1500 - elapsedTime)
+            val elapsed = System.currentTimeMillis() - startTime
+            if (elapsed < 1500) delay(1500 - elapsed)
 
             dialogLoading?.dismiss()
 
-            val sdf = SimpleDateFormat("dd/MM/yyyy | HH:mm:ss", Locale.getDefault())
-            val fechaHoraActual = sdf.format(Date())
-
-            val servicioTexto = if (modoActual == ModoEscaneo.RECREO) "RECREO" else "TRANSPORTE"
-            val estadoTexto = if (resultado.permiso == "true") "✓ $servicioTexto ACEPTADO" else "✗ $servicioTexto DENEGADO"
+            val fechaHora = SimpleDateFormat("dd/MM/yyyy | HH:mm:ss", Locale.getDefault()).format(Date())
+            val estadoTexto = if (resultado.permiso == "true") "✓ ${modoActual.label} ACEPTADO" else "✗ ${modoActual.label} DENEGADO"
             val colorEstado = if (resultado.permiso == "true")
                 ContextCompat.getColor(this@MainActivity, R.color.umbrella_green)
             else
                 ContextCompat.getColor(this@MainActivity, R.color.umbrella_red)
 
             val nombreMostrar = resultado.nombreCompleto.ifBlank { "Alumno desconocido" }
-            val textoBase = "$fechaHoraActual\n$nombreMostrar\n\n"
-            val fullText = textoBase + estadoTexto
+            val textoBase = "$fechaHora\n$nombreMostrar\n\n"
+            val fullText  = textoBase + estadoTexto
             val spannable = SpannableStringBuilder(fullText)
-            val start = textoBase.length
-            spannable.setSpan(ForegroundColorSpan(colorEstado), start, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            spannable.setSpan(StyleSpan(Typeface.BOLD), start, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            spannable.setSpan(ForegroundColorSpan(colorEstado), textoBase.length, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            spannable.setSpan(StyleSpan(Typeface.BOLD), textoBase.length, fullText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             binding.tvUltimoMovimiento.text = spannable
 
             when (resultado.permiso) {
-                "true" -> mostrarResultado(R.layout.dialog_success, nombreMostrar)
+                "true"  -> mostrarResultado(R.layout.dialog_success, nombreMostrar)
                 "false" -> mostrarResultado(R.layout.dialog_error, nombreMostrar)
-                else -> {
+                else    -> {
                     resetEstadoEscaneo()
                     Toast.makeText(this@MainActivity, "Error: ${resultado.permiso}", Toast.LENGTH_SHORT).show()
                 }
@@ -244,36 +239,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun realizarPeticionOdoo(uid: String, endpoint: String, campo: String): ResultadoOdoo = withContext(Dispatchers.IO) {
-        val urlEndpoint = "http://$SERVER_IP:8069/nfc/$endpoint"
         return@withContext try {
-            val url = URL(urlEndpoint)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            conn.connectTimeout = 5000
-            conn.doOutput = true
-
-            val jsonInputString = "{\"jsonrpc\": \"2.0\", \"params\": {\"uid\": \"$uid\"}}"
-            conn.outputStream.use { it.write(jsonInputString.toByteArray(Charsets.UTF_8)) }
+            val conn = URL("http://$SERVER_IP:8069/nfc/$endpoint").openConnection() as HttpURLConnection
+            conn.apply {
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                connectTimeout = 5000
+                doOutput = true
+            }
+            conn.outputStream.use { it.write("{\"jsonrpc\":\"2.0\",\"params\":{\"uid\":\"$uid\"}}".toByteArray(Charsets.UTF_8)) }
 
             if (conn.responseCode == 200) {
-                val response = conn.inputStream.bufferedReader().use { it.readText() }
-                val permiso = if (response.contains("\"$campo\": true")) "true" else "false"
-                val nombre = extraerCampoJson(response, "nombre")
-                val apellido = extraerCampoJson(response, "apellido")
-                val nombreCompleto = "$nombre $apellido".trim()
-                ResultadoOdoo(permiso, nombreCompleto)
+                val result = JSONObject(conn.inputStream.bufferedReader().use { it.readText() }).optJSONObject("result")
+                    ?: return@withContext ResultadoOdoo("Error de respuesta", "")
+                val permiso = if (result.optBoolean(campo)) "true" else "false"
+                val nombre  = "${result.optString("nombre", "")} ${result.optString("apellido", "")}".trim()
+                ResultadoOdoo(permiso, nombre)
             } else {
                 ResultadoOdoo("Error ${conn.responseCode}", "")
             }
         } catch (e: Exception) {
             ResultadoOdoo("Error de conexión", "")
         }
-    }
-
-    private fun extraerCampoJson(json: String, campo: String): String {
-        val patron = "\"$campo\":\\s*\"([^\"]+)\"".toRegex()
-        return patron.find(json)?.groupValues?.get(1) ?: ""
     }
 
     private fun mostrarResultado(layoutResId: Int, nombreAlumno: String) {
@@ -342,11 +329,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun tagIdToDecimal(id: ByteArray?): String {
         if (id == null) return "S/N"
-        var result: Long = 0
-        val bytesToProcess = if (id.size > 4) 4 else id.size
-        for (i in bytesToProcess - 1 downTo 0) {
+        var result = 0L
+        for (i in (minOf(id.size, 4) - 1) downTo 0) {
             result = (result shl 8) or (id[i].toInt() and 0xFF).toLong()
         }
-        return String.format("%010d", result)
+        return "%010d".format(result)
     }
 }

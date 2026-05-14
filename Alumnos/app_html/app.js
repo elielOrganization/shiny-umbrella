@@ -1,4 +1,5 @@
-const SERVER_URL = "http://10.102.6.225:8069/nfc/registrar_fichaje_alumno";
+const SERVER_IP  = "10.102.6.212";
+const SERVER_URL = `http://${SERVER_IP}:8069/nfc/registrar_fichaje_alumno`;
 
 const input       = document.getElementById('nfc-input');
 const nfcCard     = document.getElementById('nfc-card');
@@ -11,29 +12,24 @@ const overlayBox  = document.getElementById('overlay-box');
 const btnEntrada  = document.getElementById('btn-entrada');
 const btnSalida   = document.getElementById('btn-salida');
 
-let modoActual  = null;  // 'entrada' | 'salida'
-let buffer      = '';
-let bufferTimer = null;
-let procesando  = false;
+let modoActual   = null;
+let buffer       = '';
+let bufferTimer  = null;
+let procesando   = false;
 let overlayTimer = null;
-
-// ── Selección de modo ────────────────────────────────────────────────────────
 
 btnEntrada.addEventListener('click', () => seleccionarModo('entrada'));
 btnSalida.addEventListener('click',  () => seleccionarModo('salida'));
 
 function seleccionarModo(modo) {
   modoActual = modo;
-
   btnEntrada.classList.toggle('activo',   modo === 'entrada');
   btnEntrada.classList.toggle('inactivo', modo === 'salida');
   btnSalida.classList.toggle('activo',    modo === 'salida');
   btnSalida.classList.toggle('inactivo',  modo === 'entrada');
-
   nfcCard.classList.add('visible');
   nfcCard.classList.toggle('modo-entrada', modo === 'entrada');
   nfcCard.classList.toggle('modo-salida',  modo === 'salida');
-
   setEstado('Esperando tarjeta...', '');
   input.focus();
 }
@@ -49,20 +45,17 @@ function cancelarModo() {
 
 document.getElementById('btn-cancelar').addEventListener('click', cancelarModo);
 
-// ── Captura NFC ──────────────────────────────────────────────────────────────
-
 document.addEventListener('click', () => { if (modoActual) input.focus(); });
 window.addEventListener('focus',   () => { if (modoActual) input.focus(); });
 
 input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    const uid = buffer.trim();
-    buffer = '';
-    input.value = '';
-    clearTimeout(bufferTimer);
-    if (uid && modoActual && !procesando) procesarUID(uid);
-  }
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const uid = buffer.trim();
+  buffer = '';
+  input.value = '';
+  clearTimeout(bufferTimer);
+  if (uid && modoActual && !procesando) procesarUID(uid);
 });
 
 input.addEventListener('input', () => {
@@ -77,28 +70,16 @@ input.addEventListener('input', () => {
   }, 150);
 });
 
-// ── Normalización de UID ─────────────────────────────────────────────────────
-// Algunos lectores HID emiten el UID en decimal, otros en hex.
-// Esta función garantiza que siempre se envía el mismo valor a Odoo
-// independientemente del lector usado.
 function normalizarUID(raw) {
-  // Limpieza: quitar espacios, guiones y dos puntos
   const limpio = raw.trim().replace(/[\s\-:]/g, '');
-
   if (/[A-Fa-f]/.test(limpio)) {
-    // El lector emitió hex → convertir igual que tagIdToDecimal en Android:
-    // tomar los bytes, invertirlos (little-endian) y calcular el decimal.
     const bytes = (limpio.match(/.{2}/g) || []).reverse();
     let decimal = 0;
     for (const byte of bytes) decimal = decimal * 256 + parseInt(byte, 16);
     return String(decimal).padStart(10, '0');
   }
-
-  // Ya es decimal → asegurar 10 dígitos con padding
   return limpio.padStart(10, '0');
 }
-
-// ── Petición al servidor ─────────────────────────────────────────────────────
 
 async function procesarUID(uid) {
   uid = normalizarUID(uid);
@@ -129,11 +110,7 @@ async function procesarUID(uid) {
     }
   } catch (e) {
     clearTimeout(timeoutId);
-    if (e.name === 'AbortError') {
-      mostrarError('Sin respuesta del servidor');
-    } else {
-      mostrarError('Error de conexión con el servidor');
-    }
+    mostrarError(e.name === 'AbortError' ? 'Sin respuesta del servidor' : 'Error de conexión con el servidor');
   } finally {
     setEstado('Esperando tarjeta...', '');
     input.value = '';
@@ -143,23 +120,24 @@ async function procesarUID(uid) {
   }
 }
 
-// ── Overlays ─────────────────────────────────────────────────────────────────
-
-function mostrarResultado(persona, movimiento) {
-  const esEntrada = movimiento.toLowerCase() === 'entrada';
-  const simbolo   = esEntrada ? '✓' : '↑';
-  const titulo    = esEntrada ? 'ENTRADA REGISTRADA' : 'SALIDA REGISTRADA';
-  const tipo      = esEntrada ? 'entrada' : 'salida';
-  const ahora     = new Date();
-
+function mostrarOverlay(tipo, simbolo, titulo, nombre, mostrarLabel) {
+  const ahora = new Date();
   overlayBox.className = `overlay-box overlay-${tipo}`;
   document.getElementById('overlay-simbolo').textContent = simbolo;
   document.getElementById('overlay-titulo').textContent  = titulo;
-  document.getElementById('overlay-nombre').textContent  = persona;
+  document.getElementById('overlay-nombre').textContent  = nombre;
   document.getElementById('overlay-hora').textContent    = ahora.toLocaleTimeString('es-ES');
   document.getElementById('overlay-fecha').textContent   = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' });
-  document.getElementById('overlay-label').style.display = '';
+  document.getElementById('overlay-label').style.display = mostrarLabel ? '' : 'none';
   abrirOverlay();
+  return ahora;
+}
+
+function mostrarResultado(persona, movimiento) {
+  const esEntrada = movimiento.toLowerCase() === 'entrada';
+  const tipo      = esEntrada ? 'entrada' : 'salida';
+  const simbolo   = esEntrada ? '✓' : '↑';
+  const ahora     = mostrarOverlay(tipo, simbolo, esEntrada ? 'ENTRADA REGISTRADA' : 'SALIDA REGISTRADA', persona, true);
 
   resultTexto.textContent = `${simbolo} ${movimiento.toUpperCase()}  —  ${persona}`;
   resultTexto.className   = `result-texto ${tipo}`;
@@ -168,15 +146,7 @@ function mostrarResultado(persona, movimiento) {
 }
 
 function mostrarError(mensaje) {
-  const ahora = new Date();
-  overlayBox.className = 'overlay-box overlay-error';
-  document.getElementById('overlay-simbolo').textContent = '✗';
-  document.getElementById('overlay-titulo').textContent  = 'OPERACIÓN DENEGADA';
-  document.getElementById('overlay-nombre').textContent  = mensaje;
-  document.getElementById('overlay-hora').textContent    = ahora.toLocaleTimeString('es-ES');
-  document.getElementById('overlay-fecha').textContent   = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' });
-  document.getElementById('overlay-label').style.display = 'none';
-  abrirOverlay();
+  mostrarOverlay('error', '✗', 'OPERACIÓN DENEGADA', mensaje, false);
 }
 
 function abrirOverlay() {
