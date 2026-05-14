@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 class NfcCrudProfesorController(http.Controller):
     
-    @http.route('/nfc/import_profesores', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/import_profesores', type='json', auth='user', methods=['POST'], csrf=False)
     def import_profesores_csv(self, **kwargs):
         # El CSV debe venir como una cadena de texto en la clave 'csv_data'
         csv_content = request.params.get('csv_data')
@@ -61,7 +61,7 @@ class NfcCrudProfesorController(http.Controller):
             _logger.error(f"Error en la importación de profesores: {str(e)}")
             return {"status": "error", "message": f"Error procesando CSV: {str(e)}"} 
 
-    @http.route('/nfc/get_profesores', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/get_profesores', type='json', auth='user', methods=['POST'], csrf=False)
     def get_all_profesores(self, **kwargs):
         try:
             # Buscamos todos los profesores y seleccionamos los campos que necesita el frontend
@@ -82,7 +82,7 @@ class NfcCrudProfesorController(http.Controller):
             _logger.error(f"Error al obtener profesores: {str(e)}")
             return {"status": "error", "message": "No se pudo recuperar la lista de profesores"}
     
-    @http.route('/nfc/update_estado_profesor', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/update_estado_profesor', type='json', auth='user', methods=['POST'], csrf=False)
     def update_estado_profesor(self, **kwargs):
         data = request.params
         dni = data.get("dni")
@@ -116,7 +116,7 @@ class NfcCrudProfesorController(http.Controller):
             _logger.error(f"Error al actualizar estado del profesor: {str(e)}")
             return {"status": "error", "message": "Error interno al actualizar el profesor"}
     
-    @http.route('/nfc/create_profesor', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/create_profesor', type='json', auth='user', methods=['POST'], csrf=False)
     def create_profesor(self, **kwargs):
         data = request.params
         

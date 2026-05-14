@@ -74,11 +74,18 @@ class NfcLectorController(http.Controller):
             return {"status": "error", "message": "UID no proporcionado"}
 
         try:
+            # 1. Buscamos al alumno que tenga asignado ese UID
+            # El ORM buscará en la tabla nfc_alumno
             alumno = request.env['nfc.alumno'].sudo().search([('uid', '=', uid)], limit=1)
 
+            # 2. Si no encontramos al alumno, no hay permiso que valga
             if not alumno:
-                return {"permiso_recreo": False}
+                return {
+                    "permiso_recreo": False,
+                }
 
+            # 3. Devolvemos el valor del campo permiso_recreo de la instancia encontrada
+            # Como definiste el campo como Boolean, devolverá True o False
             return {
                 "nombre": alumno.nombre,
                 "apellido": alumno.apellido,
@@ -88,7 +95,7 @@ class NfcLectorController(http.Controller):
         except Exception as e:
             _logger.error(f"Error en check_recreo: {str(e)}")
             return {"status": "error", "message": "Error al consultar el permiso"}
-
+        
     @http.route('/nfc/check_transporte', type='json', auth='public', methods=['POST'], csrf=False)
     def nfc_check_transporte(self, **kwargs):
         data = request.params
@@ -98,11 +105,18 @@ class NfcLectorController(http.Controller):
             return {"status": "error", "message": "UID no proporcionado"}
 
         try:
+            # 1. Buscamos al alumno que tenga asignado ese UID
+            # El ORM buscará en la tabla nfc_alumno
             alumno = request.env['nfc.alumno'].sudo().search([('uid', '=', uid)], limit=1)
 
+            # 2. Si no encontramos al alumno, no hay permiso que valga
             if not alumno:
-                return {"permiso_transporte": False}
+                return {
+                    "permiso_transporte": False,
+                }
 
+            # 3. Devolvemos el valor del campo permiso_transporte de la instancia encontrada
+            # Como definiste el campo como Boolean, devolverá True o False
             return {
                 "nombre": alumno.nombre,
                 "apellido": alumno.apellido,
@@ -131,11 +145,9 @@ class NfcLectorController(http.Controller):
         ], limit=1, order='fecha_hora desc')
 
         # 3. Lógica de Reset Diario y Alternancia
-        # Usamos fields.Datetime.now().date() para comparar siempre en UTC,
-        # igual que como Odoo almacena fecha_hora. Así evitamos desfases de
-        # zona horaria entre el servidor y la BD. [cite: 2026-02-19]
-        fecha_hoy_utc = fields.Datetime.now().date()
-        if not ultimo_registro or ultimo_registro.fecha_hora.date() < fecha_hoy_utc:
+        # Si no hay registros previos o el último es de ayer, siempre es 'entrada' [cite: 2026-02-19]
+        fecha_hoy = date.today()
+        if not ultimo_registro or ultimo_registro.fecha_hora.date() < fecha_hoy:
             nuevo_tipo = 'entrada'
         else:
             # Si ya fichó hoy, alternamos el estado [cite: 2026-02-19]

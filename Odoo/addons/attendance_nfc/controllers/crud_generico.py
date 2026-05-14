@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 class NfcCrudGenericoController(http.Controller):
 
-    @http.route('/nfc/assign_card', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/assign_card', type='json', auth='user', methods=['POST'], csrf=False)
     def nfc_assign_card(self, **kwargs):
         data = request.params
         uid = data.get("uid")
@@ -65,7 +65,7 @@ class NfcCrudGenericoController(http.Controller):
             _logger.error(f"Error en assign_card: {str(e)}")
             return {"status": "error", "message": f"Error interno: {str(e)}"}
         
-    @http.route('/nfc/update_persona', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/update_persona', type='json', auth='user', methods=['POST'], csrf=False)
     def update_persona(self, **kwargs):
         data = request.params
         dni = data.get("dni")
@@ -88,7 +88,7 @@ class NfcCrudGenericoController(http.Controller):
         except Exception as e:
             return {"status": "error", "message": str(e)}
     
-    @http.route('/nfc/delete_persona', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/nfc/delete_persona', type='json', auth='user', methods=['POST'], csrf=False)
     def delete_persona(self, **kwargs):
         data = request.params
         dni = data.get("dni")
