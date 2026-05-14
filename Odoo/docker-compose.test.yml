@@ -1,0 +1,41 @@
+name: odoo-test
+
+services:
+  db:
+    image: postgres:16
+    container_name: odoo_test_db
+    restart: "no"
+    environment:
+      - POSTGRES_DB=NFC_Test
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - odoo-test-network
+
+  web:
+    image: elieldock/odoonfc:latest
+    container_name: odoo_test_web
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8070:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    command: ["odoo", "-c", "/etc/odoo/odoo.conf", "-d", "NFC_Test", "-i", "attendance_nfc"]
+    networks:
+      - odoo-test-network
+
+networks:
+  odoo-test-network:
+    driver: bridge
