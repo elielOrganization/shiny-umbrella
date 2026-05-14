@@ -1,40 +1,37 @@
-const SERVER_URL = "http://10.102.6.225:8069/nfc/registrar_fichaje_profesor";
+const SERVER_IP  = "10.102.6.212";
+const SERVER_URL = `http://${SERVER_IP}:8069/nfc/registrar_fichaje_profesor`;
 
-const input      = document.getElementById('nfc-input');
-const estadoEl   = document.getElementById('estado');
-const resultCard = document.getElementById('result-card');
+const input       = document.getElementById('nfc-input');
+const estadoEl    = document.getElementById('estado');
+const resultCard  = document.getElementById('result-card');
 const resultTexto = document.getElementById('result-texto');
 const resultHora  = document.getElementById('result-hora');
-const overlay    = document.getElementById('overlay');
-const overlayBox = document.getElementById('overlay-box');
+const overlay     = document.getElementById('overlay');
+const overlayBox  = document.getElementById('overlay-box');
 
-let buffer      = '';
-let bufferTimer = null;
-let procesando  = false;
+let buffer       = '';
+let bufferTimer  = null;
+let procesando   = false;
 let overlayTimer = null;
 
-// Mantener el input siempre enfocado para capturar el lector NFC
-document.addEventListener('click', () => input.focus());
+document.addEventListener('click',   () => input.focus());
 document.addEventListener('keydown', () => input.focus());
-window.addEventListener('focus', () => input.focus());
+window.addEventListener('focus',     () => input.focus());
 input.focus();
 
-// Capturar lo que escribe el lector NFC (modo teclado/HID)
 input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    const uid = buffer.trim();
-    buffer = '';
-    input.value = '';
-    clearTimeout(bufferTimer);
-    if (uid && !procesando) procesarUID(uid);
-  }
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const uid = buffer.trim();
+  buffer = '';
+  input.value = '';
+  clearTimeout(bufferTimer);
+  if (uid && !procesando) procesarUID(uid);
 });
 
 input.addEventListener('input', () => {
   buffer = input.value;
   clearTimeout(bufferTimer);
-  // Fallback: procesar si el lector no envía Enter tras 150ms sin nuevas teclas
   bufferTimer = setTimeout(() => {
     const uid = buffer.trim();
     buffer = '';
@@ -43,24 +40,14 @@ input.addEventListener('input', () => {
   }, 150);
 });
 
-// ── Normalización de UID ─────────────────────────────────────────────────────
-// Algunos lectores HID emiten el UID en decimal, otros en hex.
-// Esta función garantiza que siempre se envía el mismo valor a Odoo
-// independientemente del lector usado.
 function normalizarUID(raw) {
-  // Limpieza: quitar espacios, guiones y dos puntos
   const limpio = raw.trim().replace(/[\s\-:]/g, '');
-
   if (/[A-Fa-f]/.test(limpio)) {
-    // El lector emitió hex → convertir igual que tagIdToDecimal en Android:
-    // tomar los bytes, invertirlos (little-endian) y calcular el decimal.
     const bytes = (limpio.match(/.{2}/g) || []).reverse();
     let decimal = 0;
     for (const byte of bytes) decimal = decimal * 256 + parseInt(byte, 16);
     return String(decimal).padStart(10, '0');
   }
-
-  // Ya es decimal → asegurar 10 dígitos con padding
   return limpio.padStart(10, '0');
 }
 
@@ -91,11 +78,7 @@ async function procesarUID(uid) {
     }
   } catch (e) {
     clearTimeout(timeoutId);
-    if (e.name === 'AbortError') {
-      mostrarError('Sin respuesta del servidor (3 s)');
-    } else {
-      mostrarError('Error de conexión con el servidor');
-    }
+    mostrarError(e.name === 'AbortError' ? 'Sin respuesta del servidor (3 s)' : 'Error de conexión con el servidor');
   } finally {
     setEstado('Esperando tarjeta...', '');
     input.value = '';
@@ -105,21 +88,24 @@ async function procesarUID(uid) {
   }
 }
 
-function mostrarResultado(persona, movimiento) {
-  const esEntrada = movimiento.toLowerCase() === 'entrada';
-  const simbolo   = esEntrada ? '✓' : '↑';
-  const titulo    = esEntrada ? 'ENTRADA REGISTRADA' : 'SALIDA REGISTRADA';
-  const tipo      = esEntrada ? 'entrada' : 'salida';
-  const ahora     = new Date();
-
+function mostrarOverlay(tipo, simbolo, titulo, nombre, mostrarLabel) {
+  const ahora = new Date();
   overlayBox.className = `overlay-box overlay-${tipo}`;
   document.getElementById('overlay-simbolo').textContent = simbolo;
   document.getElementById('overlay-titulo').textContent  = titulo;
-  document.getElementById('overlay-nombre').textContent  = persona;
+  document.getElementById('overlay-nombre').textContent  = nombre;
   document.getElementById('overlay-hora').textContent    = ahora.toLocaleTimeString('es-ES');
   document.getElementById('overlay-fecha').textContent   = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' });
-  document.getElementById('overlay-label').style.display = '';
+  document.getElementById('overlay-label').style.display = mostrarLabel ? '' : 'none';
   abrirOverlay();
+  return ahora;
+}
+
+function mostrarResultado(persona, movimiento) {
+  const esEntrada = movimiento.toLowerCase() === 'entrada';
+  const tipo      = esEntrada ? 'entrada' : 'salida';
+  const simbolo   = esEntrada ? '✓' : '↑';
+  const ahora     = mostrarOverlay(tipo, simbolo, esEntrada ? 'ENTRADA REGISTRADA' : 'SALIDA REGISTRADA', persona, true);
 
   resultTexto.textContent = `${simbolo} ${movimiento.toUpperCase()}  —  ${persona}`;
   resultTexto.className   = `result-texto ${tipo}`;
@@ -128,15 +114,7 @@ function mostrarResultado(persona, movimiento) {
 }
 
 function mostrarError(mensaje) {
-  const ahora = new Date();
-  overlayBox.className = 'overlay-box overlay-error';
-  document.getElementById('overlay-simbolo').textContent = '✗';
-  document.getElementById('overlay-titulo').textContent  = 'ACCESO DENEGADO';
-  document.getElementById('overlay-nombre').textContent  = mensaje;
-  document.getElementById('overlay-hora').textContent    = ahora.toLocaleTimeString('es-ES');
-  document.getElementById('overlay-fecha').textContent   = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' });
-  document.getElementById('overlay-label').style.display = 'none';
-  abrirOverlay();
+  mostrarOverlay('error', '✗', 'ACCESO DENEGADO', mensaje, false);
 }
 
 function abrirOverlay() {
