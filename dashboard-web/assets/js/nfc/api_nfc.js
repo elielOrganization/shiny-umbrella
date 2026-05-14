@@ -3,7 +3,7 @@
  */
 window.API_NFC = {
     obtenerTodas: async function() {
-        const response = await fetch(GLOBALS.URL_GET_CARDS);
+        const response = await apiFetch(GLOBALS.URL_GET_CARDS);
         const data = await response.json();
         if (data.error) throw new Error(data.error.message || "Error en Odoo");
         return (data.result && data.result.cards) ? data.result.cards : [];
@@ -11,7 +11,7 @@ window.API_NFC = {
 
     añadir: async function(uid) {
         try {
-            const response = await fetch(GLOBALS.URL_SAVE_CARD, {
+            const response = await apiFetch(GLOBALS.URL_SAVE_CARD, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid: uid })
@@ -30,7 +30,7 @@ window.API_NFC = {
 
     eliminar: async function(uid) {
         try {
-            const response = await fetch(GLOBALS.URL_DELETE_CARD, {
+            const response = await apiFetch(GLOBALS.URL_DELETE_CARD, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid: uid })
@@ -48,7 +48,7 @@ window.API_NFC = {
 
     desvincular: async function(uid) {
         try {
-            const response = await fetch(GLOBALS.URL_UNLINK_CARD, {
+            const response = await apiFetch(GLOBALS.URL_UNLINK_CARD, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid: uid })
@@ -67,8 +67,8 @@ async function cargarTablaCompleta() {
     try {
         const [cards, dataAlumnos, dataProfesores] = await Promise.all([
             API_NFC.obtenerTodas(),
-            fetch(GLOBALS.URL_GET_ALUMNOS).then(r => r.json()),
-            fetch(GLOBALS.URL_GET_PROFESORES).then(r => r.json())
+            apiFetch(GLOBALS.URL_GET_ALUMNOS).then(r => r.json()),
+            apiFetch(GLOBALS.URL_GET_PROFESORES).then(r => r.json())
         ]);
 
         const alumnos = dataAlumnos.result?.alumnos || [];

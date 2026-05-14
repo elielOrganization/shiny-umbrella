@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/auth.php';
 $pageTitle = "Vinculación NFC - Shiny Umbrella";
 include '../includes/header.php';
 include '../includes/sidebar.php';

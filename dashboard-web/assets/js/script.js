@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryHTML += '</ul>';
 
             // --- 3. ENVIAR AL CONTROLADOR PHP ---
-            fetch(URL_IMPORT_CSV, { 
+            apiFetch(URL_IMPORT_CSV, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ csv_content: csvContent })
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // PETICIÓN FETCH
-        fetch(URL_ASSIGN_CARD, {
+        apiFetch(URL_ASSIGN_CARD, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('tableBody');
     const loader = document.getElementById('tableLoader');
 
-    fetch('../controllers/get_alumnos.php')
+    apiFetch('../controllers/get_alumnos.php')
         .then(response => response.json())
         .then(data => {
             // Accedemos a result.alumnos según la estructura de tu Odoo
@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             checkbox.closest('.table-row').style.opacity = '0.5';
 
-            fetch('../controllers/update_generic.php', {
+            apiFetch('../controllers/update_generic.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ dni: dni, campo: campo, valor: valor })

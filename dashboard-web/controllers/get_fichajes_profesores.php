@@ -1,30 +1,8 @@
 <?php
-// controllers/get_fichajes_profesores.php
-require_once __DIR__ . '/../config/odoo.php';
+require_once __DIR__ . '/../includes/auth_api.php';
 header('Content-Type: application/json');
 
-$odoo_url = $ODOO_BASE . "/nfc/get_fichajes_profesores";
+$result = odoo_call('/nfc/get_fichajes_profesores');
+odoo_require_auth($result);
 
-$payload = json_encode([
-    "jsonrpc" => "2.0",
-    "method" => "call",
-    "params" => new stdClass()
-]);
-
-$options = [
-    'http' => [
-        'header'  => "Content-Type: application/json\r\n",
-        'method'  => 'POST',
-        'content' => $payload,
-        'ignore_errors' => true
-    ]
-];
-
-$context  = stream_context_create($options);
-$response = file_get_contents($odoo_url, false, $context);
-
-if ($response === FALSE) {
-    echo json_encode(['error' => 'No se pudo conectar con Odoo']);
-} else {
-    echo $response;
-}
+echo $result['body'] ?? json_encode(['error' => 'No se pudo conectar con Odoo']);

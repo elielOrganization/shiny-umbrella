@@ -52,12 +52,12 @@
 
 /* Layout ALUMNOS (9 columnas: Datos + Acciones) */
 .table-grid-layout {
-    grid-template-columns: minmax(200px, 2fr) 1fr 0.8fr 1fr 1.2fr 0.6fr 0.6fr 0.6fr 100px;
+    grid-template-columns: minmax(180px, 2fr) 1fr 0.7fr 1fr 1.1fr 0.5fr 0.5fr 0.5fr 110px;
 }
 
 /* Layout PROFESORES (6 columnas: Datos + Acciones) */
 .table-grid-prof {
-    grid-template-columns: 2fr 1fr 1fr 1fr 80px 100px;
+    grid-template-columns: 1.8fr 1fr 1fr 1fr 80px 120px;
 }
 
 /* Layout DASHBOARD MAIN (6 columnas: Datos + Permisos) */
@@ -166,6 +166,8 @@
 }
 
 /* Overflow/ellipsis para celdas de grids */
+.table-grid-layout > div,
+.table-grid-prof > div,
 .table-grid-main > div,
 .table-grid-logs > div {
     overflow: hidden;
@@ -243,10 +245,6 @@
     text-overflow: ellipsis;
 }
 
-.text-gray { color: var(--text-gray); font-size: 0.9rem; }
-.text-mono { font-family: 'Courier New', monospace; font-weight: bold; }
-.text-center { display: flex; justify-content: center; align-items: center; text-align: center; }
-
 /* Wrapper NFC con X integrada en el pill */
 .nfc-tag-wrapper {
     position: relative;
@@ -318,8 +316,11 @@
 
 .table-actions {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
+    min-width: 90px;
 }
 
 .btn-table-action {
@@ -399,99 +400,9 @@
     color: var(--text-gray);
 }
 
+/* Spinning animation uses @keyframes spin from base.css */
 .spinning-umbrella {
     width: 50px;
     animation: spin 2s linear infinite;
     margin-bottom: 15px;
 }
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* --- TABLA ALUMNOS (9 COLUMNAS) --- */
-.table-grid-layout {
-    display: grid !important;
-    /* Ajustamos para que la columna de acciones tenga espacio suficiente */
-    grid-template-columns: minmax(180px, 2fr) 1fr 0.7fr 1fr 1.1fr 0.5fr 0.5fr 0.5fr 110px !important;
-    gap: 10px;
-    align-items: center;
-    width: 100%;
-}
-
-/* --- TABLA PROFESORES (6 COLUMNAS) --- */
-.table-grid-prof {
-    display: grid !important;
-    /* Reducimos un poco los fr para asegurar que los 120px de acciones entren */
-    grid-template-columns: 1.8fr 1fr 1fr 1fr 80px 120px !important;
-    gap: 10px;
-    align-items: center;
-    width: 100%;
-}
-
-/* --- CONTENEDOR DE ACCIONES REFORZADO --- */
-.table-actions {
-    display: flex !important;
-    flex-direction: row !important; /* Fuerza línea horizontal */
-    flex-wrap: nowrap !important;  /* Prohíbe saltar de línea */
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    min-width: 90px; /* Evita que se colapse */
-}
-
-/* Asegura que el contenido de las celdas no empuje el grid */
-.table-grid-prof > div,
-.table-grid-layout > div,
-.table-grid-main > div {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap; 
-}
-
-.modal-nfc {
-        display: none; 
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-content-nfc {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 15px;
-        width: 350px;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        border-top: 6px solid #007bff;
-    }
-
-    .close-modal {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-    }
-
-    .pulse-nfc-icon {
-        font-size: 4rem;
-        color: #007bff;
-        margin-bottom: 15px;
-        animation: pulse-animation 2s infinite;
-    }
-
-    @keyframes pulse-animation {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.6; }
-        100% { transform: scale(1); opacity: 1; }
-    }

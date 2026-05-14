@@ -89,32 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. EVENTOS: ELIMINAR ---
-    const deleteModal = document.getElementById('deleteConfirmModal');
-
-    document.getElementById('btnCancelDeleteProf')?.addEventListener('click', () => UI_Profesores.cerrarModalEliminar());
-    deleteModal?.addEventListener('click', (e) => { if (e.target === deleteModal) UI_Profesores.cerrarModalEliminar(); });
-
-    const btnConfirmarEliminar = document.getElementById('btnConfirmDeleteProf');
-    if (btnConfirmarEliminar) {
-        btnConfirmarEliminar.addEventListener('click', async function() {
-            const dni = this.getAttribute('data-dni');
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
-            this.disabled = true;
-
-            try {
-                await API_Profesores.eliminar(dni);
-                UI_Profesores.cerrarModalEliminar();
-                window.fetchProfesores();
-            } catch (err) {
-                alert("Error al eliminar: " + err.message);
-            } finally {
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
-        });
-    }
+    // --- 4. EVENTOS: ELIMINAR (gestionado por Modales global) ---
 
     // --- 5. EVENTOS: SUBIDA DE CSV ---
     const dropZone = document.getElementById('dropZoneProf');

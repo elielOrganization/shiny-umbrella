@@ -6,14 +6,14 @@
 
 window.API_Profesores = {
     obtenerTodos: async function() {
-        const response = await fetch(GLOBALS.URL_GET_PROFESORES);
+        const response = await apiFetch(GLOBALS.URL_GET_PROFESORES);
         const data = await response.json();
         this._validarErrores(data);
         return data.result.profesores || [];
     },
 
     actualizar: async function(datos) {
-        const response = await fetch(GLOBALS.URL_UPDATE_PROFESOR, {
+        const response = await apiFetch(GLOBALS.URL_UPDATE_PROFESOR, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -27,7 +27,7 @@ window.API_Profesores = {
      * Añade un nuevo profesor manualmente.
      */
     añadirManual: async function(datos) {
-        const response = await fetch(GLOBALS.URL_ADD_PROFESOR, {
+        const response = await apiFetch(GLOBALS.URL_ADD_PROFESOR, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -41,7 +41,7 @@ window.API_Profesores = {
      * Elimina un profesor de la base de datos usando su DNI o ID.
      */
     eliminar: async function(dniOdoo) {
-        const response = await fetch(GLOBALS.URL_DELETE_PERSONA, {
+        const response = await apiFetch(GLOBALS.URL_DELETE_PERSONA, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dni: dniOdoo }) 
@@ -58,7 +58,7 @@ window.API_Profesores = {
         const formData = new FormData();
         formData.append('csv_file', archivo);
 
-        const response = await fetch(GLOBALS.URL_UPLOAD_CSV_PROFESOR, {
+        const response = await apiFetch(GLOBALS.URL_UPLOAD_CSV_PROFESOR, {
             method: 'POST',
             body: formData // No ponemos Content-Type, el navegador lo calcula al usar FormData
         });
@@ -69,7 +69,7 @@ window.API_Profesores = {
 
     actualizarEstado: async function(dni, estado) {
         // Asegúrate de que el nombre de esta URL coincida con la que tienes en tu config.js
-        const response = await fetch(GLOBALS.URL_UPDATE_ESTADO, { 
+        const response = await apiFetch(GLOBALS.URL_UPDATE_ESTADO, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dni: dni, valor: estado })

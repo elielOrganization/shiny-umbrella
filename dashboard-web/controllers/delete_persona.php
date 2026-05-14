@@ -1,45 +1,16 @@
 <?php
-/**
- * Controlador para la eliminaciÃ³n de profesores usando el DNI como identificador.
- */
-require_once __DIR__ . '/../config/odoo.php';
+require_once __DIR__ . '/../includes/auth_api.php';
 header('Content-Type: application/json');
 
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
-
-// Recogemos el DNI enviado desde el JS
-$dni = $data['dni'] ?? null;
+$data = json_decode(file_get_contents('php://input'), true);
+$dni  = $data['dni'] ?? null;
 
 if (!$dni) {
-    echo json_encode(["status" => "error", "message" => "DNI no proporcionado"]);
+    echo json_encode(['status' => 'error', 'message' => 'DNI no proporcionado']);
     exit;
 }
 
-$odoo_url = $ODOO_BASE . "/nfc/delete_persona";
+$result = odoo_call('/nfc/delete_persona', ['dni' => $dni]);
+odoo_require_auth($result);
 
-/**
- * Enviamos el DNI a Odoo. 
- * AsegÃºrate de que tu funciÃ³n en Odoo reciba 'dni' en los argumentos.
- */
-$payload = json_encode([
-    "jsonrpc" => "2.0",
-    "method" => "call",
-    "params" => [
-        "dni" => $dni
-    ]
-]);
-
-$options = [
-    'http' => [
-        'header'  => "Content-Type: application/json\r\n",
-        'method'  => 'POST',
-        'content' => $payload,
-        'ignore_errors' => true
-    ]
-];
-
-$context  = stream_context_create($options);
-$response = file_get_contents($odoo_url, false, $context);
-
-echo $response;
+echo $result['body'] ?? json_encode(['error' => 'No se pudo conectar con Odoo']);

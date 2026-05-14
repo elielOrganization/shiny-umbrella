@@ -46,9 +46,9 @@ $errorMsg = match($error) {
 
     <form id="loginForm" method="POST" action="controllers/login.php">
         <div class="input-group">
-            <input type="email" name="email" id="email" class="input-field"
-                   placeholder="Correo electrónico" required
-                   value="<?php echo htmlspecialchars($_GET['email'] ?? ''); ?>">
+            <input type="text" name="login" id="login" class="input-field"
+                   placeholder="Usuario" required autocomplete="username"
+                   value="<?php echo htmlspecialchars($_GET['login'] ?? ''); ?>">
         </div>
 
         <div class="input-group password-group">
