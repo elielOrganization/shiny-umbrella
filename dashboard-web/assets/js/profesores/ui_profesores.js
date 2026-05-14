@@ -175,32 +175,45 @@ window.UI_Profesores = {
     cerrarModalCSV: () => document.getElementById('csvProfModal').classList.remove('show'),
 
     resetModalCSV: () => {
-        document.getElementById('dropZoneProf').style.display = 'block';
-        document.getElementById('processingAreaProf').style.display = 'none';
-        document.getElementById('fileInputProf').value = '';
-        const logo = document.getElementById('statusLogoProf');
-        logo.classList.remove('spinning');
-        logo.src = '../assets/img/logo_umbrella.png';
+        const drop  = document.getElementById('dropZoneProf');
+        const area  = document.getElementById('processingAreaProf');
+        const logo  = document.getElementById('statusLogoProf');
         const texto = document.getElementById('statusTextProf');
-        texto.className = 'status-text';
-        texto.textContent = 'Verificando archivo...';
-        const oldSummary = document.querySelector('.import-summary');
-        if (oldSummary) oldSummary.remove();
+        const input = document.getElementById('fileInputProf');
+        if (drop)  drop.style.display  = 'block';
+        if (area)  area.style.display  = 'none';
+        if (input) input.value         = '';
+        if (texto) texto.className     = 'status-text';
+        if (logo)  { logo.classList.remove('spinning'); logo.src = GLOBALS.IMG_LOADING; }
+        const old = document.querySelector('.import-summary');
+        if (old) old.remove();
     },
 
-    mostrarEstadoCSV: (mensaje, esError = false, detenerGiro = false) => {
+    mostrarEstadoCSV: ({ mensaje, esError = false, spinning = false, logoSrc = null, summaryHTML = null } = {}) => {
         const texto = document.getElementById('statusTextProf');
         const logo  = document.getElementById('statusLogoProf');
+        const area  = document.getElementById('processingAreaProf');
+
         document.getElementById('dropZoneProf').style.display = 'none';
-        document.getElementById('processingAreaProf').style.display = 'flex';
-        texto.textContent = mensaje;
-        if (esError) {
-            texto.classList.add('error');
-            logo.classList.remove('spinning');
-        } else {
-            texto.classList.remove('error');
-            if (!detenerGiro) logo.classList.add('spinning');
+        area.style.display = 'flex';
+
+        // Logo
+        if (logoSrc) logo.src = logoSrc;
+        if (spinning) logo.classList.add('spinning');
+        else          logo.classList.remove('spinning');
+
+        // Texto
+        texto.className = 'status-text' + (esError ? ' error' : '');
+        texto.innerHTML = mensaje;
+
+        // Resumen (lista de profesores procesados)
+        const old = area.querySelector('.import-summary');
+        if (old) old.remove();
+        if (summaryHTML) {
+            const div = document.createElement('div');
+            div.className = 'import-summary';
+            div.innerHTML = summaryHTML;
+            area.appendChild(div);
         }
-        if (detenerGiro) logo.classList.remove('spinning');
     }
 };

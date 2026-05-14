@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAbrirAñadir = document.getElementById('btnAddProfesor'); // Asume que existe un botón principal para añadir
     const btnLinkAñadir = document.getElementById('btnAñadirManualProf'); // Enlace desde el modal CSV
     
-    if (btnAbrirAñadir) btnAbrirAñadir.addEventListener('click', UI_Profesores.abrirModalManual);
+    if (btnAbrirAñadir) btnAbrirAñadir.addEventListener('click', UI_Profesores.abrirModalCSV);
     if (btnLinkAñadir) btnLinkAñadir.addEventListener('click', (e) => { e.preventDefault(); UI_Profesores.abrirModalManual(); });
 
     const formManual = document.getElementById('formManualProf');
@@ -122,19 +122,59 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        UI_Profesores.mostrarEstadoCSV("Enviando a Odoo...");
+        // 1. Leer el CSV como texto para generar el resumen visual
+        const csvText = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload  = e => resolve(e.target.result);
+            r.onerror = () => reject(new Error('No se pudo leer el archivo'));
+            r.readAsText(archivo);
+        });
+
+        // 2. Generar resumen: columnas nombre(0), apellido(1), departamento(4)
+        const lines = csvText.split('\n');
+        let summaryHTML = '<ul class="summary-list">';
+        let count = 0;
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const cols = line.split(',');
+            if (cols.length >= 5) {
+                summaryHTML += `<li><span>${cols[0].trim()} ${cols[1].trim()}</span><strong>${cols[4].trim()}</strong></li>`;
+                count++;
+            }
+        }
+        summaryHTML += '</ul>';
+
+        // 3. Mostrar estado: procesando
+        UI_Profesores.mostrarEstadoCSV({
+            mensaje:  'Procesando archivo y enviando a Odoo...',
+            spinning: true,
+            logoSrc:  GLOBALS.IMG_LOADING
+        });
 
         try {
-            const result = await API_Profesores.subirCSV(archivo);
-            UI_Profesores.mostrarEstadoCSV("¡Archivo procesado con éxito!", false, true);
-            
+            await API_Profesores.subirCSV(csvText);
+
+            // 4. Éxito: sombrilla verde + resumen
+            UI_Profesores.mostrarEstadoCSV({
+                mensaje:     `¡Importado correctamente! (${count} profesores)`,
+                logoSrc:     GLOBALS.IMG_SUCCESS,
+                summaryHTML: summaryHTML
+            });
+
             setTimeout(() => {
                 UI_Profesores.cerrarModalCSV();
+                UI_Profesores.resetModalCSV();
                 window.fetchProfesores();
             }, 3000);
 
         } catch (err) {
-            UI_Profesores.mostrarEstadoCSV("Error: " + err.message, true);
+            // 5. Error: sombrilla roja
+            UI_Profesores.mostrarEstadoCSV({
+                mensaje: 'Error: ' + err.message,
+                esError: true,
+                logoSrc: GLOBALS.IMG_ERROR
+            });
             setTimeout(() => UI_Profesores.resetModalCSV(), 4000);
         }
     }

@@ -2,7 +2,7 @@
 
 <div id="csvProfModal" class="modal-overlay">
     <div class="modal-card">
-        <span class="close-modal" onclick="document.getElementById('csvProfModal').classList.remove('show')">&times;</span>
+        <span class="close-modal">&times;</span>
         <h3 class="modal-title">Importar Profesores</h3>
         <p class="modal-subtitle">Arrastra tu archivo CSV aquí o haz clic para subirlo.</p>
 

@@ -103,30 +103,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(data => {
                     statusLogo.classList.remove('spinning');
-                    if (data.result || (data.data && !data.error)) {
-                        statusLogo.src = GLOBALS.IMG_SUCCESS;
-                        statusText.innerHTML = `¡Importado correctamente! (${count} alumnos)`;
-                        statusText.classList.add('success');
 
-                        const summaryDiv = document.createElement('div');
-                        summaryDiv.className = 'import-summary';
-                        summaryDiv.innerHTML = summaryHTML;
-                        processingArea.appendChild(summaryDiv);
+                    // Odoo envuelve en JSON-RPC: { result: { status, message } }
+                    // o devuelve error a nivel de protocolo: { error: { ... } }
+                    const res = data.result ?? data;
 
-                        setTimeout(() => {
-                            csvModal.classList.remove('show');
-                            resetCsvModal();
-                        }, 4000);
-                    } else {
-                        throw new Error(data.error ? data.error.data.message : "Error desconocido de Odoo");
+                    if (data.error) {
+                        throw new Error(data.error?.data?.message || data.error?.message || 'Error de Odoo');
                     }
+                    if (res.status === 'error') {
+                        throw new Error(res.message || 'Error al importar');
+                    }
+
+                    // Éxito
+                    statusLogo.src = GLOBALS.IMG_SUCCESS;
+                    statusText.innerHTML = `¡Importado correctamente! (${count} alumnos)`;
+                    statusText.classList.add('success');
+
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'import-summary';
+                    summaryDiv.innerHTML = summaryHTML;
+                    processingArea.appendChild(summaryDiv);
+
+                    setTimeout(() => {
+                        csvModal.classList.remove('show');
+                        resetCsvModal();
+                        if (typeof fetchAlumnos === 'function') fetchAlumnos();
+                    }, 3000);
                 })
                 .catch(error => {
                     statusLogo.classList.remove('spinning');
                     statusLogo.src = GLOBALS.IMG_ERROR;
-                    statusText.textContent = "Fallo: " + error.message;
+                    statusText.textContent = 'Error: ' + error.message;
                     statusText.classList.add('error');
-                    shakeModal(csvModal.querySelector('.modal-card'));
                     setTimeout(() => resetCsvModal(), 4000);
                 });
         };
