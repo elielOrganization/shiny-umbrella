@@ -111,12 +111,12 @@ include '../includes/sidebar.php';
 </main>
 
 <?php include '../includes/modales_profesores.php'; ?>
-<script src="../assets/js/config.js"></script>
-<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/config.js?v=2"></script>
+<script src="../assets/js/ui.js?v=2"></script>
 
-<script src="../assets/js/profesores/api_profesores.js"></script>
-<script src="../assets/js/profesores/ui_profesores.js"></script>
-<script src="../assets/js/profesores/eventos_profesores.js"></script>
-<script src="../assets/js/profesores/nfc.js"></script>
+<script src="../assets/js/profesores/api_profesores.js?v=2"></script>
+<script src="../assets/js/profesores/ui_profesores.js?v=2"></script>
+<script src="../assets/js/profesores/eventos_profesores.js?v=2"></script>
+<script src="../assets/js/profesores/nfc.js?v=2"></script>
 </body>
 </html>

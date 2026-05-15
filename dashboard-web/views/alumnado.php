@@ -109,15 +109,15 @@ include '../includes/sidebar.php';
 </main>
 
 <?php include '../includes/modales_alumnado.php'; ?>
-<script src="../assets/js/config.js"></script>
-<script src="../assets/js/ui.js"></script>
+<script src="../assets/js/config.js?v=2"></script>
+<script src="../assets/js/ui.js?v=2"></script>
 
-<script src="../assets/js/alumnos/api_alumnos.js"></script>
-<script src="../assets/js/alumnos/ui_alumnos.js"></script>
-<script src="../assets/js/alumnos/eventos_alumnos.js"></script>
+<script src="../assets/js/alumnos/api_alumnos.js?v=2"></script>
+<script src="../assets/js/alumnos/ui_alumnos.js?v=2"></script>
+<script src="../assets/js/alumnos/eventos_alumnos.js?v=2"></script>
 
-<script src="../assets/js/alumnos/nfc.js"></script>
-<script src="../assets/js/alumnos/filters.js"></script>
-<script src="../assets/js/alumnos/csv.js"></script>
+<script src="../assets/js/alumnos/nfc.js?v=2"></script>
+<script src="../assets/js/alumnos/filters.js?v=2"></script>
+<script src="../assets/js/alumnos/csv.js?v=2"></script>
 </body>
 </html>
