@@ -238,21 +238,17 @@ document.addEventListener('DOMContentLoaded', () => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Odoo suele devolver la respuesta dentro de data.result
                     const res = data.result || data;
-
-                    if (res.status === 'success' || res.id) {
-                        alert(`¡Éxito! ${res.message || 'Alumno guardado'}. ID: ${res.id}`);
+                    if (res.status === 'ok' || res.status === 'success' || res.id) {
                         manualModal.classList.remove('show');
                         formManual.reset();
                         if (typeof fetchAlumnos === 'function') fetchAlumnos();
                     } else {
-                        // Si el status es 'error' o existe un mensaje de fallo
-                        throw new Error(res.message || "Error al crear el registro");
+                        throw new Error(res.message || 'Error al crear el registro');
                     }
                 })
                 .catch(error => {
-                    alert("Error: " + error.message);
+                    setFieldError(dniField, error.message || 'Error inesperado');
                     if (typeof shakeModal === 'function') {
                         shakeModal(manualModal.querySelector('.modal-card'));
                     }

@@ -84,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         form.querySelectorAll('.field-error').forEach(e => e.remove());
     }
 
-    const formManual = document.getElementById('formManualProf');
+    const formManual     = document.getElementById('formManualProf');
+    const manualProfModal = document.getElementById('manualProfModal');
     if (formManual) {
         // Auto-mayúsculas en el campo DNI
         const dniInputProf = document.getElementById('manualProfDni');
@@ -105,9 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             clearAllProfErrors(this);
 
-            const nombreField      = document.getElementById('manualProfNombre');
-            const apellidosField   = document.getElementById('manualProfApellidos');
-            const dniField         = document.getElementById('manualProfDni');
+            const nombreField       = document.getElementById('manualProfNombre');
+            const apellidosField    = document.getElementById('manualProfApellidos');
+            const dniField          = document.getElementById('manualProfDni');
             const departamentoField = document.getElementById('manualProfDepartamento');
 
             const nombre       = nombreField.value.trim();
@@ -134,7 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 UI_Profesores.cerrarModalManual();
                 window.fetchProfesores();
             } catch (err) {
-                alert("Error al añadir: " + err.message);
+                setProfFieldError(dniField, err.message || 'Error inesperado');
+                if (typeof shakeModal === 'function') shakeModal(manualProfModal?.querySelector('.modal-card'));
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;

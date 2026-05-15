@@ -33,19 +33,19 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nombre</label>
-                    <input type="text" name="nombre" placeholder="Ej. Juan" required>
+                    <input type="text" id="manualProfNombre" name="nombre" placeholder="Ej. Juan" required>
                 </div>
                 <div class="form-group">
                     <label>Apellidos</label>
-                    <input type="text" name="apellidos" placeholder="Ej. Pérez García" required>
+                    <input type="text" id="manualProfApellidos" name="apellidos" placeholder="Ej. Pérez García" required>
                 </div>
                 <div class="form-group">
                     <label>DNI / NIE</label>
-                    <input type="text" name="dni" placeholder="12345678Z" required>
+                    <input type="text" id="manualProfDni" name="dni" placeholder="12345678Z" required>
                 </div>
                 <div class="form-group">
                     <label>Departamento</label>
-                    <select name="departamento" required>
+                    <select id="manualProfDepartamento" name="departamento" required>
                         <option value="" disabled selected>Selecciona un departamento</option>
                         <option value="Matemáticas">Matemáticas</option>
                         <option value="Lengua">Lengua</option>

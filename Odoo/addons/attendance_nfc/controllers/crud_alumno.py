@@ -28,6 +28,8 @@ class NfcCrudAlumnoController(http.Controller):
 
             AlumnoModel   = request.env['nfc.alumno'].sudo()
             ProfesorModel = request.env['nfc.profesor'].sudo()
+
+            dnis_profesores = set(ProfesorModel.search([]).mapped('dni'))
             count = 0
 
             for row in reader:
@@ -42,7 +44,7 @@ class NfcCrudAlumnoController(http.Controller):
                     continue
                 if grupo not in GRUPOS_VALIDOS:
                     continue
-                if ProfesorModel.search([('dni', '=', dni)], limit=1):
+                if dni in dnis_profesores:
                     continue
 
                 vals = {

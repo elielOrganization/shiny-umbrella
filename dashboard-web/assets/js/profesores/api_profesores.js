@@ -28,7 +28,7 @@ window.API_Profesores = {
 
     // --- CREACIÓN ---
     añadirManual: async function(datos) {
-        const response = await apiFetch(GLOBALS.URL_ADD_PROFESOR, {
+        const response = await apiFetch(GLOBALS.URL_IMPORT_PROFESOR_MANUAL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
