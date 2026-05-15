@@ -97,35 +97,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleCsvFile(file) {
         if(!dropZone || !processingArea) return;
 
-        // 1. UI: Mostrar estado "Cargando"
         dropZone.style.display = 'none';
         processingArea.style.display = 'flex';
         statusLogo.src = IMG_LOADING;
         statusLogo.classList.add('spinning');
         statusText.textContent = "Procesando archivo y enviando a Odoo...";
         statusText.className = 'status-text';
-        
-        // Limpiar lista anterior si existiera
+
         const oldSummary = processingArea.querySelector('.import-summary');
         if(oldSummary) oldSummary.remove();
 
-        // 2. Leer archivo localmente para generar vista previa
         const reader = new FileReader();
         reader.readAsText(file); 
 
         reader.onload = function(e) {
             const csvContent = e.target.result;
 
-            // --- GENERAR LA LISTA VISUAL (Nombres y DNI) ---
             const lines = csvContent.split('\n');
             let summaryHTML = '<ul class="summary-list">';
             let count = 0;
 
-            for (let i = 1; i < lines.length; i++) { // Empezar en 1 para saltar cabecera
+            for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line) {
-                    const cols = line.split(','); // Asumiendo separador por comas
-                    // Nombre(0), Apellido(1), Fecha(2), Clase(3), DNI(4)
+                    const cols = line.split(',');
                     if (cols.length >= 5) {
                         const nombre = cols[0].trim();
                         const apellido = cols[1].trim();
@@ -141,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             summaryHTML += '</ul>';
 
-            // --- 3. ENVIAR AL CONTROLADOR PHP ---
             apiFetch(URL_IMPORT_CSV, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -154,27 +148,22 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 statusLogo.classList.remove('spinning');
 
-                // Validamos si Odoo respondió bien (result existe o no hay error)
                 if (data.result || (data.data && !data.error)) {
                     statusLogo.src = IMG_SUCCESS;
                     statusText.innerHTML = `¡Importado correctamente! (${count} alumnos)`;
                     statusText.classList.add('success');
 
-                    // Mostramos la lista visual
                     const summaryDiv = document.createElement('div');
                     summaryDiv.className = 'import-summary';
                     summaryDiv.innerHTML = summaryHTML;
                     processingArea.appendChild(summaryDiv);
-                    
-                    // Esperar 4 segundos antes de cerrar para que el usuario lea
-                    setTimeout(() => { 
-                        csvModal.classList.remove('show'); 
-                        resetCsvModal(); 
-                        // window.location.reload(); // Descomentar para recargar la página
+
+                    setTimeout(() => {
+                        csvModal.classList.remove('show');
+                        resetCsvModal();
                     }, 4000);
 
                 } else {
-                    // Error lógico de Odoo
                     const errorMsg = data.error ? data.error.data.message : "Error desconocido de Odoo";
                     throw new Error(errorMsg);
                 }
@@ -230,11 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const oldScanValueSpan = document.getElementById('oldScanValue');
     const newScanValueSpan = document.getElementById('newScanValue');
 
-    // 1. ABRIR MODAL Y CAPTURAR DNI
     document.addEventListener('click', (e) => {
         if (e.target.matches('.btn-vincular')) {
-            // IMPORTANTE: Leemos el DNI del atributo data-dni del botón
-            currentStudentDni = e.target.getAttribute('data-dni'); 
+            currentStudentDni = e.target.getAttribute('data-dni');
             
             if (!currentStudentDni) {
                 alert("Error: Este botón no tiene un DNI asignado.");
@@ -249,15 +236,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (nfcInput) {
-        // 2. EVENTO DE ESCANEO (ENTER)
         nfcInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                
-                // Obtenemos valor bruto (puede ser 10 dígitos, hex, etc.)
-                const rawValue = nfcInput.value.trim();
-                
-                // Limpieza básica: solo letras y números. NO recortamos longitud.
+
+                const rawValue      = nfcInput.value.trim();
                 const formattedValue = rawValue.replace(/[^a-zA-Z0-9]/g, '');
 
                 if (!formattedValue) {
@@ -267,19 +250,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Si ya habíamos escaneado algo y es diferente, preguntamos si sobreescribir
                 if (lastScannedCode !== "" && lastScannedCode !== formattedValue) {
                     if(oldScanValueSpan) oldScanValueSpan.textContent = lastScannedCode;
                     if(newScanValueSpan) newScanValueSpan.textContent = formattedValue;
                     if(overwriteModal) overwriteModal.classList.add('show');
                 } else {
-                    // Si es el primero o es igual, procesamos
                     confirmLocalScan(formattedValue);
                 }
             }
         });
 
-        // Truco: Seleccionar todo el texto al enfocar para facilitar reescritura
         nfcInput.addEventListener('focus', () => {
             nfcInput.select();
         });
@@ -309,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nfcInput.select(); 
     }
 
-    // 3. GUARDAR EN ODOO
     document.getElementById('btnSaveNfc')?.addEventListener('click', () => {
         if(!nfcInput) return;
         const idValue = nfcInput.value.trim();
@@ -320,16 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Aquí podríamos comprobar duplicados locales si tuviéramos una lista cargada
-        // Por ahora enviamos directamente a procesar
         processNfcSave(idValue);
     });
 
-    // 4. PROCESAR GUARDADO (LLAMADA AL SERVIDOR)
     function processNfcSave(idValue) {
         if(!nfcContent || !nfcProcessing) return;
-        
-        // UI: Mostrar carga
+
         nfcContent.style.display = 'none';
         nfcProcessing.style.display = 'flex';
         
@@ -342,13 +317,12 @@ document.addEventListener('DOMContentLoaded', () => {
             nfcStatusText.className = 'status-text';
         }
 
-        // PETICIÓN FETCH
         apiFetch(URL_ASSIGN_CARD, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                uid: idValue,       // Código del chip
-                dni: currentStudentDni // DNI del alumno
+            body: JSON.stringify({
+                uid: idValue,
+                dni: currentStudentDni
             })
         })
         .then(response => {
@@ -359,21 +333,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if(nfcStatusLogo) nfcStatusLogo.classList.remove('spinning');
 
             if (data.result) {
-                // ÉXITO
                 if(nfcStatusLogo) nfcStatusLogo.src = IMG_SUCCESS;
                 if(nfcStatusText) {
                     nfcStatusText.textContent = "¡Tarjeta vinculada correctamente!";
                     nfcStatusText.classList.add('success');
                 }
                 
-                // Cerrar modal
                 setTimeout(() => {
                     nfcModal.classList.remove('show');
-                    // location.reload(); // Descomentar si quieres recargar la página
                 }, 1500);
 
             } else {
-                // ERROR DE ODOO
                 throw new Error(data.error ? data.error.data.message : "Error desconocido al asignar.");
             }
         })
@@ -386,8 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             shakeModal(nfcModal.querySelector('.modal-card'));
 
-            // Volver a mostrar el input tras 2.5 segundos para reintentar
-            setTimeout(() => { 
+            setTimeout(() => {
                 nfcProcessing.style.display = 'none'; 
                 nfcContent.style.display = 'block'; 
                 nfcInput.focus();
@@ -405,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nfcInput.style.borderColor = '#d1d5db';
         nfcInput.style.boxShadow = "none";
         lastScannedCode = "";
-        // No reseteamos currentStudentDni aquí porque lo necesitamos si hubo un error y reintentamos
     }
 });
 

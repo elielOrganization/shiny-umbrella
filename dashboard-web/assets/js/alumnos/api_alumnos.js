@@ -1,9 +1,12 @@
 const AlumnosAPI = {
+
+    // --- LECTURA ---
     async getAlumnos() {
         const response = await apiFetch(GLOBALS.URL_GET_ALUMNOS);
         return response.json();
     },
 
+    // --- NFC ---
     async assignCard(uid, dni) {
         try {
             const response = await apiFetch(GLOBALS.URL_ASSIGN_CARD, {
@@ -11,7 +14,7 @@ const AlumnosAPI = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid, dni, tipo: 'alumno' })
             });
-            
+
             const data = await response.json();
 
             if (data.error) {
@@ -22,12 +25,13 @@ const AlumnosAPI = {
                 throw new Error(data.message || "Error desconocido en el proceso");
             }
 
-            return data; 
+            return data;
         } catch (error) {
             throw error;
         }
     },
 
+    // --- ACTUALIZACIÓN ---
     async updateTransporte(dni, valor) {
         const response = await apiFetch(GLOBALS.URL_UPDATE_TRANSPORTE, {
             method: 'POST',
@@ -55,6 +59,7 @@ const AlumnosAPI = {
         return response.json();
     },
 
+    // --- ELIMINACIÓN ---
     async deleteAlumno(dni) {
         const response = await apiFetch(GLOBALS.URL_DELETE_PERSONA, {
             method: 'POST',

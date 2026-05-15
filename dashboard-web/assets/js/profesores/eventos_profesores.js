@@ -54,30 +54,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 3. EVENTOS: AÑADIR MANUALMENTE ---
-    const btnAbrirAñadir = document.getElementById('btnAddProfesor'); // Asume que existe un botón principal para añadir
-    const btnLinkAñadir = document.getElementById('btnAñadirManualProf'); // Enlace desde el modal CSV
-    
+    const btnAbrirAñadir = document.getElementById('btnAddProfesor');
+    const btnLinkAñadir  = document.getElementById('btnAñadirManualProf');
+
     if (btnAbrirAñadir) btnAbrirAñadir.addEventListener('click', UI_Profesores.abrirModalCSV);
-    if (btnLinkAñadir) btnLinkAñadir.addEventListener('click', (e) => { e.preventDefault(); UI_Profesores.abrirModalManual(); });
+    if (btnLinkAñadir)  btnLinkAñadir.addEventListener('click', (e) => { e.preventDefault(); UI_Profesores.abrirModalManual(); });
+
+    const DNI_REGEX_PROF = /^\d{8}[A-Z]$/;
+
+    function setProfFieldError(field, msg) {
+        field.classList.add('input-invalid');
+        let err = field.parentElement.querySelector('.field-error');
+        if (!err) {
+            err = document.createElement('span');
+            err.className = 'field-error';
+            field.after(err);
+        }
+        err.textContent = msg;
+    }
+
+    function clearProfFieldError(field) {
+        field.classList.remove('input-invalid');
+        const err = field.parentElement.querySelector('.field-error');
+        if (err) err.remove();
+    }
+
+    function clearAllProfErrors(form) {
+        form.querySelectorAll('.input-invalid').forEach(f => f.classList.remove('input-invalid'));
+        form.querySelectorAll('.field-error').forEach(e => e.remove());
+    }
 
     const formManual = document.getElementById('formManualProf');
     if (formManual) {
+        // Auto-mayúsculas en el campo DNI
+        const dniInputProf = document.getElementById('manualProfDni');
+        if (dniInputProf) {
+            dniInputProf.addEventListener('input', () => {
+                const pos = dniInputProf.selectionStart;
+                dniInputProf.value = dniInputProf.value.toUpperCase();
+                dniInputProf.setSelectionRange(pos, pos);
+            });
+        }
+
+        // Limpiar el error de cada campo en cuanto el usuario lo edita
+        formManual.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', () => clearProfFieldError(field));
+        });
+
         formManual.addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearAllProfErrors(this);
+
+            const nombreField      = document.getElementById('manualProfNombre');
+            const apellidosField   = document.getElementById('manualProfApellidos');
+            const dniField         = document.getElementById('manualProfDni');
+            const departamentoField = document.getElementById('manualProfDepartamento');
+
+            const nombre       = nombreField.value.trim();
+            const apellidos    = apellidosField.value.trim();
+            const dni          = dniField.value.trim().toUpperCase();
+            const departamento = departamentoField.value;
+
+            let hayErrores = false;
+
+            if (!nombre)                    { setProfFieldError(nombreField,      'El nombre es obligatorio.');               hayErrores = true; }
+            if (!apellidos)                 { setProfFieldError(apellidosField,   'Los apellidos son obligatorios.');         hayErrores = true; }
+            if (!DNI_REGEX_PROF.test(dni))  { setProfFieldError(dniField,         'Formato inválido. Ej: 12345678Z');        hayErrores = true; }
+            if (!departamento)              { setProfFieldError(departamentoField, 'Selecciona un departamento.');             hayErrores = true; }
+
+            if (hayErrores) return;
+
             const btn = this.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
             btn.disabled = true;
 
-            const datos = {
-                nombre: document.getElementById('manualProfNombre').value.trim(),
-                apellidos: document.getElementById('manualProfApellidos').value.trim(),
-                dni: document.getElementById('manualProfDni').value.trim(),
-                departamento: document.getElementById('manualProfDepartamento').value
-            };
-
             try {
-                await API_Profesores.añadirManual(datos);
+                await API_Profesores.añadirManual({ nombre, apellidos, dni, departamento });
                 UI_Profesores.cerrarModalManual();
                 window.fetchProfesores();
             } catch (err) {
@@ -122,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 1. Leer el CSV como texto para generar el resumen visual
         const csvText = await new Promise((resolve, reject) => {
             const r = new FileReader();
             r.onload  = e => resolve(e.target.result);
@@ -130,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
             r.readAsText(archivo);
         });
 
-        // 2. Generar resumen: columnas nombre(0), apellido(1), departamento(4)
         const lines = csvText.split('\n');
         let summaryHTML = '<ul class="summary-list">';
         let count = 0;
@@ -145,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         summaryHTML += '</ul>';
 
-        // 3. Mostrar estado: procesando
         UI_Profesores.mostrarEstadoCSV({
             mensaje:  'Procesando archivo y enviando a Odoo...',
             spinning: true,
@@ -155,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await API_Profesores.subirCSV(csvText);
 
-            // 4. Éxito: sombrilla verde + resumen
             UI_Profesores.mostrarEstadoCSV({
                 mensaje:     `¡Importado correctamente! (${count} profesores)`,
                 logoSrc:     GLOBALS.IMG_SUCCESS,
@@ -169,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
 
         } catch (err) {
-            // 5. Error: sombrilla roja
             UI_Profesores.mostrarEstadoCSV({
                 mensaje: 'Error: ' + err.message,
                 esError: true,
@@ -182,41 +230,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableBody = document.getElementById('tableBodyProf');
     if (tableBody) {
         tableBody.addEventListener('change', async function(e) {
-            // Comprobamos si lo que ha cambiado es un interruptor de estado
             if (e.target.classList.contains('prof-estado-switch')) {
                 const dni = e.target.getAttribute('data-dni');
-                const nuevoEstado = e.target.checked; // true (activado) o false (desactivado)
-                
-                // Bloqueamos el interruptor mientras enviamos a Odoo
+                const nuevoEstado = e.target.checked;
+
                 e.target.disabled = true;
-                
+
                 try {
                     await API_Profesores.actualizarEstado(dni, nuevoEstado);
-                    // Opcional: podrías mostrar una pequeña notificación de éxito aquí
                 } catch (error) {
                     alert("Error al cambiar el estado: " + error.message);
-                    // Si el servidor falla, devolvemos el interruptor visualmente a donde estaba
                     e.target.checked = !nuevoEstado;
                 } finally {
-                    // Desbloqueamos el interruptor
                     e.target.disabled = false;
                 }
             }
         });
     }
 
-// ==========================================
-    // 7. EVENTOS: FILTROS Y BÚSQUEDA
-    // ==========================================
-    const btnToggleFiltros = document.getElementById('btnFilterToggleProf'); 
-    const panelFiltros = document.getElementById('filterMenuProf');
-    
-    // 1. Abrir/Cerrar el menú
+    // --- FILTROS Y BÚSQUEDA ---
+    const btnToggleFiltros = document.getElementById('btnFilterToggleProf');
+    const panelFiltros     = document.getElementById('filterMenuProf');
+
     if (btnToggleFiltros && panelFiltros) {
         btnToggleFiltros.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            panelFiltros.classList.toggle('show'); 
+            panelFiltros.classList.toggle('show');
         });
 
         document.addEventListener('click', (e) => {
@@ -226,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Aplicar Filtros
     const btnAplicarFiltros = document.getElementById('btnApplyFiltersProf');
     if (btnAplicarFiltros) {
         btnAplicarFiltros.addEventListener('click', () => {
@@ -235,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Borrar Filtros
     const btnBorrarFiltros = document.getElementById('btnClearFiltersProf');
     if (btnBorrarFiltros) {
         btnBorrarFiltros.addEventListener('click', () => {
@@ -247,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Buscador por texto (Búsqueda en vivo)
     const buscadorInput = document.getElementById('tableSearchProf');
     if (buscadorInput) {
         buscadorInput.addEventListener('input', aplicarFiltrosYBusqueda);

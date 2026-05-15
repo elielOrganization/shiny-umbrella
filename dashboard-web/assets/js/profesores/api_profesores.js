@@ -5,6 +5,8 @@
  */
 
 window.API_Profesores = {
+
+    // --- LECTURA ---
     obtenerTodos: async function() {
         const response = await apiFetch(GLOBALS.URL_GET_PROFESORES);
         const data = await response.json();
@@ -12,6 +14,7 @@ window.API_Profesores = {
         return data.result.profesores || [];
     },
 
+    // --- ACTUALIZACIÓN ---
     actualizar: async function(datos) {
         const response = await apiFetch(GLOBALS.URL_UPDATE_PROFESOR, {
             method: 'POST',
@@ -23,9 +26,7 @@ window.API_Profesores = {
         return data.result;
     },
 
-    /**
-     * Añade un nuevo profesor manualmente.
-     */
+    // --- CREACIÓN ---
     añadirManual: async function(datos) {
         const response = await apiFetch(GLOBALS.URL_ADD_PROFESOR, {
             method: 'POST',
@@ -37,9 +38,7 @@ window.API_Profesores = {
         return data.result;
     },
 
-    /**
-     * Elimina un profesor de la base de datos usando su DNI o ID.
-     */
+    // --- ELIMINACIÓN ---
     eliminar: async function(dniOdoo) {
         const response = await apiFetch(GLOBALS.URL_DELETE_PERSONA, {
             method: 'POST',
@@ -51,10 +50,8 @@ window.API_Profesores = {
         return data.result;
     },
 
-    /**
-     * Sube y procesa un archivo CSV con profesores.
-     */
-    // Acepta un File o directamente el texto del CSV (para evitar doble lectura)
+    // --- CSV ---
+    // Acepta un File o directamente el texto (para evitar doble lectura)
     subirCSV: async function(archivoOTexto) {
         const csvContent = (typeof archivoOTexto === 'string')
             ? archivoOTexto
@@ -77,7 +74,6 @@ window.API_Profesores = {
     },
 
     actualizarEstado: async function(dni, estado) {
-        // Asegúrate de que el nombre de esta URL coincida con la que tienes en tu config.js
         const response = await apiFetch(GLOBALS.URL_UPDATE_ESTADO, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -88,9 +84,7 @@ window.API_Profesores = {
         return data.result;
     },
 
-    /**
-     * Método interno privado para evitar repetir la validación de errores.
-     */
+    // --- INTERNO ---
     _validarErrores: function(data) {
         if (data.error) throw new Error(data.error.data?.message || data.error.message || "Error interno en Odoo");
         const res = data.result || {};

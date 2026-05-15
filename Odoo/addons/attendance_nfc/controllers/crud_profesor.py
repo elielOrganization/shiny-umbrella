@@ -7,65 +7,67 @@ import logging, re
 
 _logger = logging.getLogger(__name__)
 
+DEPARTAMENTOS_VALIDOS = {'Matemáticas', 'Lengua', 'Inglés', 'Ciencias', 'Historia', 'Tecnología'}
+
 class NfcCrudProfesorController(http.Controller):
-    
+
     @http.route('/nfc/import_profesores', type='json', auth='user', methods=['POST'], csrf=False)
     def import_profesores_csv(self, **kwargs):
-        # El CSV debe venir como una cadena de texto en la clave 'csv_data'
         csv_content = request.params.get('csv_data')
-        
+
         if not csv_content:
             return {"status": "error", "message": "No se recibió el contenido del CSV"}
 
         try:
             f = io.StringIO(csv_content)
-            # El lector asume que el CSV tiene las cabeceras: nombre, apellido, dni, departamento
             reader = csv.DictReader(f)
-            
+
             ProfesorModel = request.env['nfc.profesor'].sudo()
+            AlumnoModel   = request.env['nfc.alumno'].sudo()
             count = 0
 
             for row in reader:
-                dni = row.get('dni')
+                dni          = (row.get('dni') or '').strip()
+                nombre       = (row.get('nombre') or '').strip()
+                apellido     = (row.get('apellido') or '').strip()
+                departamento = (row.get('departamento') or '').strip()
 
-                if not dni:
+                if not dni or not nombre or not apellido:
                     continue
-
                 if not re.match(r'^\d{8}[A-Z]$', dni):
+                    continue
+                if departamento not in DEPARTAMENTOS_VALIDOS:
+                    continue
+                if AlumnoModel.search([('dni', '=', dni)], limit=1):
                     continue
 
                 vals = {
-                    'nombre': row.get('nombre'),
-                    'apellido': row.get('apellido'),
+                    'nombre': nombre,
+                    'apellido': apellido,
                     'dni': dni,
-                    'departamento': row.get('departamento'),
-                    'uid': '', 
+                    'departamento': departamento,
+                    'uid': '',
                     'estado': True
                 }
 
-                # Usamos el ORM para buscar por DNI [cite: 2025-12-29]
                 profesor_instancia = ProfesorModel.search([('dni', '=', dni)], limit=1)
-
                 if profesor_instancia:
-                    # Si existe, actualizamos los datos [cite: 2025-12-29]
                     profesor_instancia.write(vals)
                 else:
-                    # Si no existe, creamos el nuevo registro [cite: 2025-12-29]
                     ProfesorModel.create(vals)
-                
                 count += 1
 
             return {"status": "ok", "message": f"Se han procesado {count} profesores correctamente."}
 
         except Exception as e:
             _logger.error(f"Error en la importación de profesores: {str(e)}")
-            return {"status": "error", "message": f"Error procesando CSV: {str(e)}"} 
+            return {"status": "error", "message": f"Error procesando CSV: {str(e)}"}
 
     @http.route('/nfc/get_profesores', type='json', auth='user', methods=['POST'], csrf=False)
     def get_all_profesores(self, **kwargs):
         try:
             # Buscamos todos los profesores y seleccionamos los campos que necesita el frontend
-            # search_read devuelve una lista de diccionarios directamente [cite: 2025-12-29]
+            # search_read devuelve una lista de diccionarios directamente
             profesores_data = request.env['nfc.profesor'].sudo().search_read(
                 [], # Filtro vacío para traer todos
                 ['nombre', 'apellido', 'dni', 'uid', 'departamento', 'estado',] # Campos específicos
@@ -93,13 +95,11 @@ class NfcCrudProfesorController(http.Controller):
             return {"status": "error", "message": "Faltan parámetros: dni o estado"}
 
         try:
-            # 1. Buscamos al profesor por DNI usando sudo para permisos
             profesor = request.env['nfc.profesor'].sudo().search([('dni', '=', dni)], limit=1)
 
             if not profesor:
                 return {"status": "error", "message": f"No se encontró el profesor con DNI: {dni}"}
 
-            # 2. Actualizamos el campo 'estado' definido en tu modelo NfcProfesor
             profesor.write({
                 'estado': bool(nuevo_estado)
             })
@@ -118,39 +118,38 @@ class NfcCrudProfesorController(http.Controller):
     
     @http.route('/nfc/create_profesor', type='json', auth='user', methods=['POST'], csrf=False)
     def create_profesor(self, **kwargs):
-        data = request.params
-        
-        # Extraemos los campos del JSON
-        nombre = data.get('nombre')
-        apellido = data.get('apellido')
-        dni = data.get('dni')
-        departamento = data.get('departamento')
+        data         = request.params
+        nombre       = (data.get('nombre') or '').strip()
+        apellido     = (data.get('apellido') or '').strip()
+        dni          = (data.get('dni') or '').strip()
+        departamento = (data.get('departamento') or '').strip()
 
-        # Validación de campos obligatorios
         if not all([nombre, apellido, dni, departamento]):
-            return {
-                "status": "error", 
-                "message": "Faltan campos obligatorios (nombre, apellido, dni o departamento)"
-            }
-        
-        if dni and not re.match(r'^\d{8}[A-Z]$', dni):
+            return {"status": "error", "message": "Faltan campos obligatorios (nombre, apellido, dni o departamento)"}
+
+        if not re.match(r'^\d{8}[A-Z]$', dni):
             return {"status": "error", "message": "Formato de DNI inválido (Ej: 12345678Z)"}
+
+        if departamento not in DEPARTAMENTOS_VALIDOS:
+            return {"status": "error", "message": f"Departamento '{departamento}' no válido"}
 
         try:
             ProfesorModel = request.env['nfc.profesor'].sudo()
+            AlumnoModel   = request.env['nfc.alumno'].sudo()
 
-            # Verificamos si el DNI ya existe
             if ProfesorModel.search([('dni', '=', dni)], limit=1):
                 return {"status": "error", "message": f"Ya existe un profesor con el DNI {dni}"}
 
-            # Creación del registro
+            if AlumnoModel.search([('dni', '=', dni)], limit=1):
+                return {"status": "error", "message": f"El DNI {dni} ya está registrado como alumno"}
+
             ProfesorModel.create({
                 'nombre': nombre,
                 'apellido': apellido,
                 'dni': dni,
                 'departamento': departamento,
-                'uid': False,     
-                'estado': True     
+                'uid': False,
+                'estado': True
             })
 
             return {"status": "ok", "message": "Creado correctamente"}

@@ -2,7 +2,7 @@
    modals.css
    ========================================= */
 
-/* Fondo oscuro translúcido */
+/* --- OVERLAY Y TARJETA BASE --- */
 .modal-overlay {
     display: none;
     /* Oculto por defecto */
@@ -268,10 +268,22 @@
     transition: border-color 0.2s;
 }
 
-.form-group input:focus, 
+.form-group input:focus,
 .form-group select:focus {
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input.input-invalid,
+.form-group select.input-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.field-error {
+    font-size: 0.78rem;
+    color: #ef4444;
+    margin-top: -2px;
 }
 
 /* En móviles, que sea una sola columna */
@@ -281,9 +293,7 @@
     }
 }
 
-/* =========================================
-   Modal box custom (estilo vinculacion)
-   ========================================= */
+/* --- MODAL CUSTOM (VINCULAR / ELIMINAR / DESVINCULAR) --- */
 .modal-overlay-custom {
     display: none;
     position: fixed;

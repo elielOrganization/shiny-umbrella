@@ -7,10 +7,10 @@ class NfcFichajeAlumno(models.Model):
     _description = "Registro Detallado de Asistencia Alumnos"
     _order = "fecha_hora desc"
 
-    # Relación con el alumno [cite: 2026-01-03]
+    # Relación con el alumno
     alumno_id = fields.Many2one('nfc.alumno', string="Alumno", required=True, index=True, ondelete='cascade')
     
-    # Datos del movimiento [cite: 2026-02-19]
+    # Datos del movimiento
     fecha_hora = fields.Datetime(string="Fecha y Hora", default=fields.Datetime.now, readonly=True)
     
     tipo_movimiento = fields.Selection([
@@ -18,20 +18,20 @@ class NfcFichajeAlumno(models.Model):
         ('salida', 'Salida')
     ], string="Tipo", required=True)
 
-    # Campos de control de permisos (Traídos del alumno mediante related) [cite: 2026-01-09]
+    # Campos de control de permisos (Traídos del alumno mediante related)
     tiene_permiso_salida = fields.Boolean(related='alumno_id.permiso_salida', string="¿Tenía permiso de salida?", store=True)
 
-    # Auditoría técnica [cite: 2025-12-29]
+    # Auditoría técnica
     uid_usado = fields.Char(string="UID Tarjeta", readonly=True)
 
-    # Campo computado para la vista de Odoo [cite: 2025-12-29]
+    # Campo computado para la vista de Odoo
     display_name_sujeto = fields.Char(string="Persona", compute="_compute_display_name_sujeto", store=True)
 
     @api.depends('alumno_id')
     def _compute_display_name_sujeto(self):
         for r in self:
             if r.alumno_id:
-                # Concatenamos nombre y apellido del alumno [cite: 2025-12-29]
+                # Concatenamos nombre y apellido del alumno
                 r.display_name_sujeto = f"{r.alumno_id.nombre} {r.alumno_id.apellido} (Alumno)"
             else:
                 r.display_name_sujeto = "Desconocido"
@@ -40,9 +40,9 @@ class NfcFichajeAlumno(models.Model):
     def _check_permisos_salida(self):
         """
         Valida que si un alumno intenta registrar una salida, 
-        realmente tenga el permiso activo en su ficha [cite: 2026-01-09].
+        realmente tenga el permiso activo en su ficha.
         """
         for r in self:
             if r.tipo_movimiento == 'salida' and not r.alumno_id.permiso_salida:
-                # Si no tiene permiso de salida, lanzamos error para bloquear el registro [cite: 2026-02-19]
+                # Si no tiene permiso de salida, lanzamos error para bloquear el registro
                 raise ValidationError(f"El alumno {r.alumno_id.nombre} no tiene autorización para salir del centro.")

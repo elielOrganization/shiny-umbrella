@@ -162,6 +162,7 @@
     padding: 10px 0;
 }
 
+/* --- NAVEGACIÓN --- */
 .nav-list { list-style: none; flex: 1; }
 .nav-item {
     display: flex; 

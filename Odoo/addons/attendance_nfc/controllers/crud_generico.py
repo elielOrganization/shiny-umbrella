@@ -21,7 +21,6 @@ class NfcCrudGenericoController(http.Controller):
             return {"status": "error", "message": "Faltan datos (uid o dni)"}
 
         try:
-            # 1. Verificar la existencia de la tarjeta
             NfcCard = request.env['nfc.card'].sudo()
             tarjeta = NfcCard.search([('uid', '=', uid)], limit=1)
 
@@ -34,7 +33,6 @@ class NfcCrudGenericoController(http.Controller):
                     "message": "La tarjeta ya está activa."
                 }
 
-            # 2. Identificar al sujeto usando el tipo enviado por el frontend
             tipo = data.get("tipo", "alumno")   # 'alumno' | 'profesor'
 
             if tipo == "profesor":
@@ -45,11 +43,7 @@ class NfcCrudGenericoController(http.Controller):
             if not sujeto:
                 return {"status": "error", "message": f"No se encontró ningún {tipo} con ese DNI"}
 
-            # 3. Operaciones de vinculación mediante el ORM
-            # Activamos la tarjeta física
             tarjeta.write({'activo': True})
-            
-            # Vinculamos el UID al registro del sujeto (alumno o profesor)
             sujeto.write({'uid': uid})
 
             _logger.info(f"ÉXITO: Tarjeta {uid} vinculada a {sujeto.nombre} ({tipo}) con DNI: {dni}")
@@ -95,17 +89,13 @@ class NfcCrudGenericoController(http.Controller):
             return {"status": "error", "message": "DNI no proporcionado"}
 
         try:
-            # 1. Buscar en Profesores
             sujeto = request.env['nfc.profesor'].sudo().search([('dni', '=', dni)], limit=1)
-            
+
             if not sujeto:
-                # 2. Buscar en Alumnos
                 sujeto = request.env['nfc.alumno'].sudo().search([('dni', '=', dni)], limit=1)
 
             if not sujeto:
                 return {"status": "error", "message": "No se encontró el registro para eliminar"}
-
-            # 3. Eliminar registro [cite: 2025-12-29]
             nombre_borrado = sujeto.nombre
             sujeto.unlink() 
 

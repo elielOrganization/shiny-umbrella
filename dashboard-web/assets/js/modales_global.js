@@ -147,7 +147,6 @@ window.Modales = (function () {
                     setColor(color);
                 };
 
-                // — Validaciones previas al envío —
                 if (!uid) {
                     mostrarError('fa-wifi', 'No se detectó ninguna tarjeta. Acércala de nuevo.');
                     setTimeout(() => { _resetVincularNfc(); nfcInput.focus(); }, 3000);
@@ -167,7 +166,6 @@ window.Modales = (function () {
                     return;
                 }
 
-                // — Envío —
                 iconWait.style.display  = 'none';
                 imgStatus.src           = '../assets/img/logo_umbrella.png';
                 imgStatus.style.display = 'block';
@@ -204,7 +202,6 @@ window.Modales = (function () {
                         return;
                     }
 
-                    // — Éxito —
                     imgStatus.classList.remove('spinning-umbrella');
                     imgStatus.src    = '../assets/img/logo_umbrella_success.png';
                     nfcMsg.className = 'msg-success';

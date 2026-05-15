@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(findstr /R \"avatar.*purple\\\\|avatar.*orange\" views\\\\*.php includes\\\\*.php assets\\\\js\\\\*.js)",
-      "Bash(xargs grep -l \"error_reporting\")",
-      "Bash(for f *)"
-    ]
-  }
-}

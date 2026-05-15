@@ -148,17 +148,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. LÓGICA DE ENVÍO MANUAL ---
 
+    const DNI_REGEX = /^\d{8}[A-Z]$/;
+
+    function setFieldError(field, msg) {
+        field.classList.add('input-invalid');
+        let err = field.parentElement.querySelector('.field-error');
+        if (!err) {
+            err = document.createElement('span');
+            err.className = 'field-error';
+            field.after(err);
+        }
+        err.textContent = msg;
+    }
+
+    function clearFieldError(field) {
+        field.classList.remove('input-invalid');
+        const err = field.parentElement.querySelector('.field-error');
+        if (err) err.remove();
+    }
+
+    function clearAllErrors(form) {
+        form.querySelectorAll('.input-invalid').forEach(f => f.classList.remove('input-invalid'));
+        form.querySelectorAll('.field-error').forEach(e => e.remove());
+    }
+
     if (formManual) {
+        // Auto-mayúsculas en el campo DNI
+        const dniInputAlumno = formManual.querySelector('[name="dni"]');
+        if (dniInputAlumno) {
+            dniInputAlumno.addEventListener('input', () => {
+                const pos = dniInputAlumno.selectionStart;
+                dniInputAlumno.value = dniInputAlumno.value.toUpperCase();
+                dniInputAlumno.setSelectionRange(pos, pos);
+            });
+        }
+
+        // Limpiar el error de cada campo en cuanto el usuario lo edita
+        formManual.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', () => clearFieldError(field));
+        });
+
         formManual.addEventListener('submit', function (e) {
             e.preventDefault();
+            clearAllErrors(this);
 
-            // CAPTURA MANUAL: Obtenemos los valores uno a uno para evitar errores de envío
+            const nombreField   = this.querySelector('[name="nombre"]');
+            const apellidosField = this.querySelector('[name="apellidos"]');
+            const dniField      = this.querySelector('[name="dni"]');
+            const fechaField    = this.querySelector('[name="fecha_nacimiento"]');
+            const claseField    = this.querySelector('[name="clase"]');
+            const seccionField  = this.querySelector('[name="seccion"]');
+
+            const nombre    = nombreField.value.trim();
+            const apellidos = apellidosField.value.trim();
+            const dni       = dniField.value.trim().toUpperCase();
+            const fecha     = fechaField.value;
+            const clase     = claseField.value;
+            const seccion   = seccionField.value;
+
+            let hayErrores = false;
+
+            if (!nombre)                { setFieldError(nombreField,    'El nombre es obligatorio.');                        hayErrores = true; }
+            if (!apellidos)             { setFieldError(apellidosField, 'Los apellidos son obligatorios.');                  hayErrores = true; }
+            if (!DNI_REGEX.test(dni))   { setFieldError(dniField,       'Formato inválido. Ej: 12345678Z');                 hayErrores = true; }
+            if (!fecha)                 { setFieldError(fechaField,     'La fecha de nacimiento es obligatoria.');           hayErrores = true; }
+            if (!clase)                 { setFieldError(claseField,     'Selecciona un curso.');                             hayErrores = true; }
+            if (!seccion)               { setFieldError(seccionField,   'Selecciona una sección.');                         hayErrores = true; }
+
+            if (hayErrores) return;
+
             const datosAEnviar = {
-                nombre: this.querySelector('[name="nombre"]').value.trim(),
-                apellidos: this.querySelector('[name="apellidos"]').value.trim(),
-                dni: this.querySelector('[name="dni"]').value.trim(),
-                fecha_nacimiento: this.querySelector('[name="fecha_nacimiento"]').value,
-                grupo_clase: `${this.querySelector('[name="clase"]').value} ${this.querySelector('[name="seccion"]').value}`
+                nombre,
+                apellidos,
+                dni,
+                fecha_nacimiento: fecha,
+                grupo_clase: `${clase} ${seccion}`
             };
 
             const submitBtn = this.querySelector('button[type="submit"]');

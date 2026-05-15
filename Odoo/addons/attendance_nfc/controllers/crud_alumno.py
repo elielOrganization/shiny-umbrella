@@ -7,39 +7,49 @@ import logging, re
 
 _logger = logging.getLogger(__name__)
 
+GRUPOS_VALIDOS = {
+    f'{curso} {seccion}'
+    for curso in ['1º ESO', '2º ESO', '3º ESO', '4º ESO', '1º BACH', '2º BACH']
+    for seccion in ['A', 'B', 'C', 'D']
+}
+
 class NfcCrudAlumnoController(http.Controller):
 
     @http.route('/nfc/import_alumnos', type='json', auth='user', methods=['POST'], csrf=False)
     def import_alumnos_csv(self, **kwargs):
-        # El CSV debe venir como una cadena de texto en la clave 'csv_data'
         csv_content = request.params.get('csv_data')
-        
+
         if not csv_content:
             return {"status": "error", "message": "No se recibió el contenido del CSV"}
 
         try:
             f = io.StringIO(csv_content)
-            # El lector asume que el orden de las columnas es: nombre, apellido, fecha_nacimiento, grupo_clase, dni
             reader = csv.DictReader(f)
-            
-            AlumnoModel = request.env['nfc.alumno'].sudo()
+
+            AlumnoModel   = request.env['nfc.alumno'].sudo()
+            ProfesorModel = request.env['nfc.profesor'].sudo()
             count = 0
 
             for row in reader:
-                dni = row.get('dni')
+                dni      = (row.get('dni') or '').strip()
+                nombre   = (row.get('nombre') or '').strip()
+                apellido = (row.get('apellido') or '').strip()
+                grupo    = (row.get('grupo_clase') or '').strip()
 
-                if not dni:
+                if not dni or not nombre or not apellido:
                     continue
-                
-                if dni and not re.match(r'^\d{8}[A-Z]$', dni):
+                if not re.match(r'^\d{8}[A-Z]$', dni):
+                    continue
+                if grupo not in GRUPOS_VALIDOS:
+                    continue
+                if ProfesorModel.search([('dni', '=', dni)], limit=1):
                     continue
 
-                # El campo permiso_transporte no se incluye, Odoo usará el default=False
                 vals = {
-                    'nombre': row.get('nombre'),
-                    'apellido': row.get('apellido'),
-                    'fecha_nacimiento': row.get('fecha_nacimiento'),
-                    'grupo_clase': row.get('grupo_clase'),
+                    'nombre': nombre,
+                    'apellido': apellido,
+                    'fecha_nacimiento': (row.get('fecha_nacimiento') or '').strip() or False,
+                    'grupo_clase': grupo,
                     'dni': dni,
                     'uid': '',
                     'permiso_salida': False,
@@ -47,9 +57,7 @@ class NfcCrudAlumnoController(http.Controller):
                     'permiso_transporte': False,
                 }
 
-                # Usamos el ORM para buscar por DNI
                 alumno_instancia = AlumnoModel.search([('dni', '=', dni)], limit=1)
-
                 if alumno_instancia:
                     alumno_instancia.write(vals)
                 else:
@@ -66,7 +74,7 @@ class NfcCrudAlumnoController(http.Controller):
     def get_all_alumnos(self, **kwargs):
         try:
             # Buscamos todos los alumnos y seleccionamos los campos que necesita el frontend
-            # search_read devuelve una lista de diccionarios directamente [cite: 2025-12-29]
+            # search_read devuelve una lista de diccionarios directamente
             alumnos_data = request.env['nfc.alumno'].sudo().search_read(
                 [], # Filtro vacío para traer todos
                 ['nombre', 'apellido', 'dni', 'uid', 'fecha_nacimiento', 'permiso_salida', 'permiso_recreo', 'permiso_transporte', 'grupo_clase'] # Campos específicos
@@ -95,13 +103,11 @@ class NfcCrudAlumnoController(http.Controller):
             return {"status": "error", "message": "Faltan parámetros: dni o permiso_transporte"}
 
         try:
-            # 1. Buscamos al alumno por DNI
             alumno = request.env['nfc.alumno'].sudo().search([('dni', '=', dni)], limit=1)
 
             if not alumno:
                 return {"status": "error", "message": f"No se encontró el alumno con DNI: {dni}"}
 
-            # 2. Actualizamos el campo en la base de datos usando el ORM
             alumno.write({
                 'permiso_transporte': bool(nuevo_estado)
             })
@@ -120,28 +126,38 @@ class NfcCrudAlumnoController(http.Controller):
     
     @http.route('/nfc/create_alumno', type='json', auth='user', methods=['POST'], csrf=False)
     def create_alumno(self, **kwargs):
-        data = request.params
-        dni = data.get('dni')
-        # ... resto de campos ...
+        data     = request.params
+        nombre   = (data.get('nombre') or '').strip()
+        apellido = (data.get('apellido') or '').strip()
+        dni      = (data.get('dni') or '').strip()
+        fecha    = (data.get('fecha_nacimiento') or '').strip()
+        grupo    = (data.get('grupo_clase') or '').strip()
 
-        # 1. Validación manual PREVIA a la interacción con el ORM
-        if dni and not re.match(r'^\d{8}[A-Z]$', dni):
+        if not all([nombre, apellido, dni, fecha, grupo]):
+            return {"status": "error", "message": "Faltan campos obligatorios (nombre, apellido, dni, fecha de nacimiento o grupo)"}
+
+        if not re.match(r'^\d{8}[A-Z]$', dni):
             return {"status": "error", "message": "Formato de DNI inválido (Ej: 12345678Z)"}
 
+        if grupo not in GRUPOS_VALIDOS:
+            return {"status": "error", "message": f"Grupo '{grupo}' no válido. Usa el formato '1º ESO A', '2º BACH C', etc."}
+
         try:
-            AlumnoModel = request.env['nfc.alumno'].sudo()
+            AlumnoModel   = request.env['nfc.alumno'].sudo()
+            ProfesorModel = request.env['nfc.profesor'].sudo()
 
-            # 2. Comprobar duplicados
             if AlumnoModel.search([('dni', '=', dni)], limit=1):
-                return {"status": "error", "message": "El DNI ya existe"}
+                return {"status": "error", "message": f"Ya existe un alumno con el DNI {dni}"}
 
-            # 3. Solo si todo está bien, creamos
+            if ProfesorModel.search([('dni', '=', dni)], limit=1):
+                return {"status": "error", "message": f"El DNI {dni} ya está registrado como profesor"}
+
             AlumnoModel.create({
-                'nombre': data.get('nombre'),
-                'apellido': data.get('apellido'),
+                'nombre': nombre,
+                'apellido': apellido,
                 'dni': dni,
-                'fecha_nacimiento': data.get('fecha_nacimiento'),
-                'grupo_clase': data.get('grupo_clase'),
+                'fecha_nacimiento': fecha,
+                'grupo_clase': grupo,
                 'uid': False,
                 'permiso_transporte': False,
             })
@@ -149,6 +165,5 @@ class NfcCrudAlumnoController(http.Controller):
             return {"status": "ok", "message": "Creado correctamente"}
 
         except Exception as e:
-            # Si algo falla aquí, Odoo hará rollback automáticamente
             _logger.error(f"Error: {str(e)}")
             return {"status": "error", "message": f"Error interno: {str(e)}"}

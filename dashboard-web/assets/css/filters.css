@@ -1,4 +1,6 @@
 /* filters.css */
+
+/* --- MENÚ DESPLEGABLE --- */
 .filter-dropdown-container {
     position: relative;
     display: inline-block;
@@ -35,6 +37,7 @@
     }
 }
 
+/* --- SECCIONES Y TÍTULOS --- */
 .filter-section h4 {
     margin: 0 0 14px 0;
     font-size: 0.7rem;
@@ -187,7 +190,7 @@
     transform: translateX(18px);
 }
 
-/* Colores personalizados para iconos */
+/* --- ICONOS DE COLOR --- */
 .icon-transport {
     color: #f59e0b;
 }

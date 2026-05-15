@@ -3,11 +3,14 @@
  */
 
 window.UI_Profesores = {
+
+    // --- ESTADO INTERNO ---
     _allData:   [],
     _filtered:  [],
     _page:      1,
     POR_PAGINA: 10,
 
+    // --- LOADER ---
     toggleLoader: function(mostrar) {
         const loader    = document.getElementById('tableLoaderProf');
         const tableBody = document.getElementById('tableBodyProf');
@@ -20,6 +23,7 @@ window.UI_Profesores = {
         }
     },
 
+    // --- TABLA ---
     renderizarTabla: function(listaProfesores) {
         this._allData  = listaProfesores || [];
         this._filtered = this._allData;
@@ -109,6 +113,7 @@ window.UI_Profesores = {
         tableBody.innerHTML = html + paginacion;
     },
 
+    // --- PAGINACIÓN ---
     _cambiarPagina: function(dir) {
         const totalPags = Math.max(1, Math.ceil(this._filtered.length / this.POR_PAGINA));
         const body      = document.getElementById('tableBodyProf');

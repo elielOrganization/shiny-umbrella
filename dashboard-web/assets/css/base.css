@@ -1,6 +1,7 @@
 /* base.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* --- VARIABLES GLOBALES --- */
 :root {
     --primary-blue: #3b82f6;
     --light-blue-bg: #eef4ff;
@@ -16,11 +17,12 @@
     --header-height: 40px;
 }
 
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    font-family: 'Inter', sans-serif; 
+/* --- RESET Y BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
 }
 
 body { 
@@ -30,7 +32,7 @@ body {
     overflow-x: hidden; 
 }
 
-/* Animaciones Globales */
+/* --- ANIMACIONES GLOBALES --- */
 .spinning {
     animation: spin 1s linear infinite;
 }
