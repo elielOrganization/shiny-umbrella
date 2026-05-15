@@ -36,6 +36,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    // Cada modo tiene su endpoint en Odoo, el campo de permiso que se lee
+    // en la respuesta y la etiqueta que se muestra en pantalla
     enum class ModoEscaneo(val endpoint: String, val campo: String, val label: String) {
         RECREO("check_recreo", "permiso_recreo", "RECREO"),
         TRANSPORTE("check_transporte", "permiso_transporte", "TRANSPORTE"),
@@ -43,13 +45,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val SERVER_IP = "10.102.6.212"
+        // Cambiar aquí si el servidor cambia de dirección
+        private const val SERVER_IP = "10.102.6.187"
     }
 
-    data class ResultadoOdoo(
-        val permiso: String,
-        val nombreCompleto: String
-    )
+    data class ResultadoOdoo(val permiso: String, val nombreCompleto: String)
 
     private var modoActual = ModoEscaneo.NINGUNO
     private var nfcAdapter: NfcAdapter? = null
@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         setupAnimations()
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        // FLAG_MUTABLE necesario en Android 12+ para que el Intent pueda modificarse
         pendingIntent = PendingIntent.getActivity(
             this, 0,
             Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
@@ -77,19 +78,16 @@ class MainActivity : AppCompatActivity() {
         binding.btnRecreo.setOnClickListener {
             ejecutarClickBoton(it) { prepararEscaneo(ModoEscaneo.RECREO) }
         }
-
         binding.btnTransporte.setOnClickListener {
             ejecutarClickBoton(it) { prepararEscaneo(ModoEscaneo.TRANSPORTE) }
         }
     }
 
+    // Animaciones de entrada: logo con rebote, header y botones con retardo escalonado
     private fun setupAnimations() {
         binding.logoUmbrella.apply {
-            scaleX = 0f
-            scaleY = 0f
-            alpha = 0f
-            animate()
-                .scaleX(1f).scaleY(1f).alpha(1f)
+            scaleX = 0f; scaleY = 0f; alpha = 0f
+            animate().scaleX(1f).scaleY(1f).alpha(1f)
                 .setDuration(600)
                 .setInterpolator(OvershootInterpolator(1.5f))
                 .withEndAction { startLogoPulse() }
@@ -97,55 +95,42 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.header.apply {
-            alpha = 0f
-            translationY = -20f
-            animate()
-                .alpha(1f).translationY(0f)
-                .setDuration(500)
-                .setStartDelay(250)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+            alpha = 0f; translationY = -20f
+            animate().alpha(1f).translationY(0f)
+                .setDuration(500).setStartDelay(250)
+                .setInterpolator(DecelerateInterpolator()).start()
         }
 
         listOf(binding.btnRecreo, binding.btnTransporte).forEachIndexed { index, view ->
-            view.alpha = 0f
-            view.translationY = 90f
-            view.animate()
-                .alpha(1f).translationY(0f)
+            view.alpha = 0f; view.translationY = 90f
+            view.animate().alpha(1f).translationY(0f)
                 .setDuration(550)
                 .setStartDelay(350L + (index * 130))
-                .setInterpolator(DecelerateInterpolator(1.8f))
-                .start()
+                .setInterpolator(DecelerateInterpolator(1.8f)).start()
         }
 
         binding.cardMovement.apply {
-            alpha = 0f
-            translationY = 40f
-            animate()
-                .alpha(1f).translationY(0f)
-                .setDuration(450)
-                .setStartDelay(650)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
+            alpha = 0f; translationY = 40f
+            animate().alpha(1f).translationY(0f)
+                .setDuration(450).setStartDelay(650)
+                .setInterpolator(DecelerateInterpolator()).start()
         }
     }
 
+    // Pulso suave infinito del logo para indicar que la app está activa
     private fun startLogoPulse() {
         binding.logoUmbrella.animate()
-            .scaleX(1.06f).scaleY(1.06f)
-            .setDuration(1000)
+            .scaleX(1.06f).scaleY(1.06f).setDuration(1000)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .withEndAction {
                 binding.logoUmbrella.animate()
-                    .scaleX(1f).scaleY(1f)
-                    .setDuration(1000)
+                    .scaleX(1f).scaleY(1f).setDuration(1000)
                     .setInterpolator(AccelerateDecelerateInterpolator())
-                    .withEndAction { startLogoPulse() }
-                    .start()
-            }
-            .start()
+                    .withEndAction { startLogoPulse() }.start()
+            }.start()
     }
 
+    // Micro-animación de pulsación del botón antes de ejecutar la acción
     private fun ejecutarClickBoton(view: android.view.View, accion: () -> Unit) {
         view.animate().scaleX(0.96f).scaleY(0.96f).setDuration(100).withEndAction {
             view.animate().scaleX(1f).scaleY(1f).setDuration(150)
@@ -154,6 +139,7 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
+    // Comprueba que NFC está disponible, guarda el modo y activa el foreground dispatch
     private fun prepararEscaneo(modo: ModoEscaneo) {
         val adapter = nfcAdapter
         if (adapter == null || !adapter.isEnabled) {
@@ -169,8 +155,7 @@ class MainActivity : AppCompatActivity() {
         if (dialogNfc?.isShowing == true) return
         val view = layoutInflater.inflate(R.layout.dialog_nfc, null)
         dialogNfc = AlertDialog.Builder(this)
-            .setView(view)
-            .setCancelable(true)
+            .setView(view).setCancelable(true)
             .setOnCancelListener { resetEstadoEscaneo() }
             .create()
         dialogNfc?.window?.attributes?.windowAnimations = R.style.DialogAnimation
@@ -181,18 +166,16 @@ class MainActivity : AppCompatActivity() {
     private fun mostrarLoading() {
         val loadingBinding = DialogLoadingBinding.inflate(layoutInflater)
         dialogLoading = AlertDialog.Builder(this)
-            .setView(loadingBinding.root)
-            .setCancelable(false)
-            .create()
+            .setView(loadingBinding.root).setCancelable(false).create()
         dialogLoading?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialogLoading?.window?.attributes?.windowAnimations = R.style.DialogAnimation
         dialogLoading?.show()
     }
 
+    // Recibe el tag NFC, extrae el UID y lanza el procesamiento
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (modoActual == ModoEscaneo.NINGUNO) return
-
         val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
         tag?.let {
             val uid = tagIdToDecimal(it.id)
@@ -202,6 +185,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Consulta Odoo, espera mínimo 1.5s para evitar parpadeos, muestra el resultado
     private fun procesarLecturaNFC(uidTag: String) {
         lifecycleScope.launch {
             val startTime = System.currentTimeMillis()
@@ -219,6 +203,7 @@ class MainActivity : AppCompatActivity() {
             else
                 ContextCompat.getColor(this@MainActivity, R.color.umbrella_red)
 
+            // Texto del último movimiento con el resultado en color y negrita
             val nombreMostrar = resultado.nombreCompleto.ifBlank { "Alumno desconocido" }
             val textoBase = "$fechaHora\n$nombreMostrar\n\n"
             val fullText  = textoBase + estadoTexto
@@ -238,6 +223,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // HTTP POST a Odoo en hilo IO. Parsea la respuesta JSON para obtener permiso y nombre
     private suspend fun realizarPeticionOdoo(uid: String, endpoint: String, campo: String): ResultadoOdoo = withContext(Dispatchers.IO) {
         return@withContext try {
             val conn = URL("http://$SERVER_IP:8069/nfc/$endpoint").openConnection() as HttpURLConnection
@@ -250,7 +236,8 @@ class MainActivity : AppCompatActivity() {
             conn.outputStream.use { it.write("{\"jsonrpc\":\"2.0\",\"params\":{\"uid\":\"$uid\"}}".toByteArray(Charsets.UTF_8)) }
 
             if (conn.responseCode == 200) {
-                val result = JSONObject(conn.inputStream.bufferedReader().use { it.readText() }).optJSONObject("result")
+                val result = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                    .optJSONObject("result")
                     ?: return@withContext ResultadoOdoo("Error de respuesta", "")
                 val permiso = if (result.optBoolean(campo)) "true" else "false"
                 val nombre  = "${result.optString("nombre", "")} ${result.optString("apellido", "")}".trim()
@@ -263,42 +250,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Muestra el diálogo de éxito o error con el nombre del alumno y anima el icono
     private fun mostrarResultado(layoutResId: Int, nombreAlumno: String) {
         val view = layoutInflater.inflate(layoutResId, null)
         view.findViewById<TextView>(R.id.txt_uid_report)?.text = nombreAlumno
-
         val imgView = view.findViewById<ImageView>(R.id.img_success_icon)
             ?: view.findViewById<ImageView>(R.id.img_error_icon)
 
         val dialog = AlertDialog.Builder(this)
-            .setView(view)
-            .setCancelable(true)
+            .setView(view).setCancelable(true)
             .setOnDismissListener { resetEstadoEscaneo() }
             .create()
         dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
+        // Aparece con rebote y luego hace una pequeña pulsación
         imgView?.apply {
-            scaleX = 0f
-            scaleY = 0f
-            alpha = 0f
-            animate()
-                .scaleX(1f).scaleY(1f).alpha(1f)
-                .setDuration(550)
-                .setStartDelay(150)
+            scaleX = 0f; scaleY = 0f; alpha = 0f
+            animate().scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(550).setStartDelay(150)
                 .setInterpolator(OvershootInterpolator(2.5f))
                 .withEndAction {
-                    animate()
-                        .scaleX(1.08f).scaleY(1.08f)
-                        .setDuration(180)
+                    animate().scaleX(1.08f).scaleY(1.08f).setDuration(180)
                         .setInterpolator(AccelerateDecelerateInterpolator())
                         .withEndAction {
-                            animate()
-                                .scaleX(1f).scaleY(1f)
-                                .setDuration(180)
-                                .setInterpolator(AccelerateDecelerateInterpolator())
-                                .start()
+                            animate().scaleX(1f).scaleY(1f).setDuration(180)
+                                .setInterpolator(AccelerateDecelerateInterpolator()).start()
                         }.start()
                 }.start()
         }
@@ -327,6 +305,8 @@ class MainActivity : AppCompatActivity() {
         deshabilitarNfcForeground()
     }
 
+    // Convierte los bytes del ID NFC a decimal de 10 dígitos.
+    // Las tarjetas de 4 bytes se leen en little-endian, por eso se recorre al revés.
     private fun tagIdToDecimal(id: ByteArray?): String {
         if (id == null) return "S/N"
         var result = 0L

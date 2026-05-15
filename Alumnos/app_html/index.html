@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- Input invisible que captura lo que escribe el lector NFC (modo teclado/HID) -->
   <input id="nfc-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
 
   <div class="header">
@@ -17,6 +18,7 @@
 
   <div class="centro">
 
+    <!-- Pantalla inicial: el operador elige si va a fichar entradas o salidas -->
     <div class="botones-modo">
       <button class="btn-modo btn-entrada" id="btn-entrada">
         <span class="btn-icono">🏫</span>
@@ -28,6 +30,7 @@
       </button>
     </div>
 
+    <!-- Aparece al elegir modo. El icono pulsa para indicar que el lector está activo -->
     <div class="nfc-card" id="nfc-card">
       <span class="nfc-icon">📡</span>
       <h2>Acerque su tarjeta NFC al lector</h2>
@@ -35,6 +38,7 @@
       <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
     </div>
 
+    <!-- Muestra el último fichaje registrado. Empieza invisible y aparece con animación -->
     <div class="result-card" id="result-card">
       <div class="result-texto" id="result-texto"></div>
       <div class="result-hora" id="result-hora"></div>
@@ -46,6 +50,12 @@
     Shiny Umbrella &nbsp;·&nbsp; Registro de Alumnos &nbsp;·&nbsp; v1.0
   </div>
 
+  <!--
+    Overlay de resultado: cubre la pantalla 4 segundos tras cada fichaje.
+    Variantes de color según clase en overlay-box:
+      overlay-entrada → verde | overlay-salida → azul | overlay-error → rojo
+    Se cierra al tocar o automáticamente.
+  -->
   <div class="overlay-bg" id="overlay" onclick="cerrarOverlay()">
     <div class="overlay-box" id="overlay-box">
       <div class="overlay-header">
