@@ -27,6 +27,7 @@ class NfcCrudProfesorController(http.Controller):
 
             dnis_alumnos = set(AlumnoModel.search([]).mapped('dni'))
             count = 0
+            rechazados = []
 
             for row in reader:
                 dni          = (row.get('dni') or '').strip()
@@ -35,12 +36,16 @@ class NfcCrudProfesorController(http.Controller):
                 departamento = (row.get('departamento') or '').strip()
 
                 if not dni or not nombre or not apellido:
+                    rechazados.append({'nombre': nombre or '?', 'apellido': apellido or '?', 'razon': 'Datos incompletos'})
                     continue
                 if not re.match(r'^\d{8}[A-Z]$', dni):
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': f'DNI inválido: {dni}'})
                     continue
                 if departamento not in DEPARTAMENTOS_VALIDOS:
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': f'Departamento inválido: {departamento or "(vacío)"}'})
                     continue
                 if dni in dnis_alumnos:
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': 'DNI ya registrado como alumno'})
                     continue
 
                 vals = {
@@ -59,7 +64,9 @@ class NfcCrudProfesorController(http.Controller):
                     ProfesorModel.create(vals)
                 count += 1
 
-            return {"status": "ok", "message": f"Se han procesado {count} profesores correctamente."}
+            if count == 0:
+                return {"status": "error", "message": f"No se importó ningún profesor ({len(rechazados)} filas rechazadas).", "rechazados": rechazados}
+            return {"status": "ok", "message": f"Se han procesado {count} profesores correctamente.", "rechazados": rechazados}
 
         except Exception as e:
             _logger.error(f"Error en la importación de profesores: {str(e)}")

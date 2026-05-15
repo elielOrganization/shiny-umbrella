@@ -89,5 +89,10 @@ window.API_Profesores = {
         if (data.error) throw new Error(data.error.data?.message || data.error.message || "Error interno en Odoo");
         const res = data.result || {};
         if (res.error) throw new Error(res.error);
+        if (res.status === 'error') {
+            const err = new Error(res.message || 'Error desconocido');
+            err.rechazados = res.rechazados || [];
+            throw err;
+        }
     }
 };

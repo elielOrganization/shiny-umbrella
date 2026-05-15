@@ -112,7 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error(data.error?.data?.message || data.error?.message || 'Error de Odoo');
                     }
                     if (res.status === 'error') {
-                        throw new Error(res.message || 'Error al importar');
+                        const err = new Error(res.message || 'Error al importar');
+                        err.rechazados = res.rechazados || [];
+                        throw err;
                     }
 
                     // Éxito
@@ -134,9 +136,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => {
                     statusLogo.classList.remove('spinning');
                     statusLogo.src = GLOBALS.IMG_ERROR;
-                    statusText.textContent = 'Error: ' + error.message;
+                    statusText.textContent = error.message;
                     statusText.classList.add('error');
-                    setTimeout(() => resetCsvModal(), 4000);
+
+                    const oldSummary = processingArea.querySelector('.import-summary');
+                    if (oldSummary) oldSummary.remove();
+
+                    if (error.rechazados?.length) {
+                        const summaryDiv = document.createElement('div');
+                        summaryDiv.className = 'import-summary';
+                        summaryDiv.innerHTML = '<ul class="summary-list">' +
+                            error.rechazados.map(r =>
+                                `<li><span>${r.nombre} ${r.apellido}</span><strong style="color:#ef4444">${r.razon}</strong></li>`
+                            ).join('') +
+                            '</ul>';
+                        processingArea.appendChild(summaryDiv);
+                    }
+
+                    setTimeout(() => resetCsvModal(), error.rechazados?.length ? 8000 : 4000);
                 });
         };
 

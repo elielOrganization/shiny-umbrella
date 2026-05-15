@@ -31,20 +31,26 @@ class NfcCrudAlumnoController(http.Controller):
 
             dnis_profesores = set(ProfesorModel.search([]).mapped('dni'))
             count = 0
+            rechazados = []
 
             for row in reader:
                 dni      = (row.get('dni') or '').strip()
                 nombre   = (row.get('nombre') or '').strip()
                 apellido = (row.get('apellido') or '').strip()
                 grupo    = (row.get('grupo_clase') or '').strip()
+                etiqueta = f"{nombre} {apellido}".strip() or dni or '?'
 
                 if not dni or not nombre or not apellido:
+                    rechazados.append({'nombre': nombre or '?', 'apellido': apellido or '?', 'razon': 'Datos incompletos'})
                     continue
                 if not re.match(r'^\d{8}[A-Z]$', dni):
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': f'DNI inválido: {dni}'})
                     continue
                 if grupo not in GRUPOS_VALIDOS:
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': f'Grupo inválido: {grupo or "(vacío)"}'})
                     continue
                 if dni in dnis_profesores:
+                    rechazados.append({'nombre': nombre, 'apellido': apellido, 'razon': 'DNI ya registrado como profesor'})
                     continue
 
                 vals = {
@@ -66,7 +72,9 @@ class NfcCrudAlumnoController(http.Controller):
                     AlumnoModel.create(vals)
                 count += 1
 
-            return {"status": "ok", "message": f"Se han procesado {count} alumnos correctamente."}
+            if count == 0:
+                return {"status": "error", "message": f"No se importó ningún alumno ({len(rechazados)} filas rechazadas).", "rechazados": rechazados}
+            return {"status": "ok", "message": f"Se han procesado {count} alumnos correctamente.", "rechazados": rechazados}
 
         except Exception as e:
             _logger.error(f"Error en la importación: {str(e)}")

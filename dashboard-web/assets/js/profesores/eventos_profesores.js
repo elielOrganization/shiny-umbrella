@@ -220,12 +220,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
 
         } catch (err) {
+            let summaryHTML = null;
+            if (err.rechazados?.length) {
+                summaryHTML = '<ul class="summary-list">' +
+                    err.rechazados.map(r =>
+                        `<li><span>${r.nombre} ${r.apellido}</span><strong style="color:#ef4444">${r.razon}</strong></li>`
+                    ).join('') +
+                    '</ul>';
+            }
             UI_Profesores.mostrarEstadoCSV({
-                mensaje: 'Error: ' + err.message,
-                esError: true,
-                logoSrc: GLOBALS.IMG_ERROR
+                mensaje:     err.message,
+                esError:     true,
+                logoSrc:     GLOBALS.IMG_ERROR,
+                summaryHTML: summaryHTML
             });
-            setTimeout(() => UI_Profesores.resetModalCSV(), 4000);
+            setTimeout(() => UI_Profesores.resetModalCSV(), summaryHTML ? 8000 : 4000);
         }
     }
 
