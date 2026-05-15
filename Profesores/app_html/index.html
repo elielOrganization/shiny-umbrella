@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- Input invisible que captura lo que escribe el lector NFC (modo teclado/HID) -->
   <input id="nfc-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
 
   <div class="header">
@@ -16,12 +17,15 @@
   </div>
 
   <div class="centro">
+
+    <!-- Siempre visible. El servidor decide automáticamente si es entrada o salida -->
     <div class="nfc-card" id="nfc-card">
       <span class="nfc-icon">📡</span>
       <h2>Acerque su tarjeta NFC al lector</h2>
       <div class="estado" id="estado">Esperando tarjeta...</div>
     </div>
 
+    <!-- Muestra el último fichaje registrado. Empieza invisible y aparece con animación -->
     <div class="result-card" id="result-card">
       <div class="result-texto" id="result-texto"></div>
       <div class="result-hora" id="result-hora"></div>
@@ -32,6 +36,12 @@
     Shiny Umbrella &nbsp;·&nbsp; Sistema de Fichaje &nbsp;·&nbsp; v1.0
   </div>
 
+  <!--
+    Overlay de resultado: cubre la pantalla 4 segundos tras cada fichaje.
+    Variantes de color según clase en overlay-box:
+      overlay-entrada → verde | overlay-salida → azul | overlay-error → rojo
+    Se cierra al tocar o automáticamente.
+  -->
   <div class="overlay-bg" id="overlay" onclick="cerrarOverlay()">
     <div class="overlay-box" id="overlay-box">
       <div class="overlay-header">

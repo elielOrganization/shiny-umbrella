@@ -27,7 +27,7 @@ REQUISITOS
     (Edge viene preinstalado en Windows 10/11)
   - Lector NFC USB conectado al PC (debe funcionar en modo
     teclado/HID, es decir, que el PC lo reconozca como teclado)
-  - Conexión de red al servidor del colegio (10.102.6.212)
+  - Conexión de red al servidor del colegio (10.102.6.187)
 
 
 CÓMO SE ABRE LA APP
@@ -54,7 +54,7 @@ CÓMO FUNCIONA POR DENTRO
      (hay un campo de texto oculto siempre activo).
 
   5. Se envía una petición al servidor Odoo del colegio:
-       Dirección : http://10.102.6.212:8069
+       Dirección : http://10.102.6.187:8069
        Endpoint  : /nfc/registrar_fichaje_profesor
        Formato   : JSON-RPC 2.0
 
@@ -107,7 +107,7 @@ POSIBLES ERRORES Y SOLUCIONES
 SERVIDOR Y BASE DE DATOS
 ─────────────────────────
   Servidor : Odoo 18
-  IP       : 10.102.6.212
+  IP       : 10.102.6.187
   Puerto   : 8069
   Módulo   : attendance_nfc
   Modelos  : nfc.profesor / nfc.fichaje.profesor

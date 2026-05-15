@@ -1,6 +1,8 @@
-const SERVER_IP  = "10.102.6.212";
+// Cambiar SERVER_IP aquí si el servidor cambia de dirección
+const SERVER_IP  = "10.102.6.187";
 const SERVER_URL = `http://${SERVER_IP}:8069/nfc/registrar_fichaje_alumno`;
 
+// Referencias al DOM
 const input       = document.getElementById('nfc-input');
 const nfcCard     = document.getElementById('nfc-card');
 const estadoEl    = document.getElementById('estado');
@@ -12,11 +14,13 @@ const overlayBox  = document.getElementById('overlay-box');
 const btnEntrada  = document.getElementById('btn-entrada');
 const btnSalida   = document.getElementById('btn-salida');
 
-let modoActual   = null;
-let buffer       = '';
-let bufferTimer  = null;
-let procesando   = false;
-let overlayTimer = null;
+let modoActual   = null;   // 'entrada' | 'salida' | null
+let buffer       = '';     // acumula los caracteres del lector NFC
+let bufferTimer  = null;   // fallback si el lector no envía Enter
+let procesando   = false;  // evita procesar dos lecturas a la vez
+let overlayTimer = null;   // cierra el overlay tras 4s
+
+// ── Selección de modo ─────────────────────────────────────────────────────────
 
 btnEntrada.addEventListener('click', () => seleccionarModo('entrada'));
 btnSalida.addEventListener('click',  () => seleccionarModo('salida'));
@@ -45,8 +49,12 @@ function cancelarModo() {
 
 document.getElementById('btn-cancelar').addEventListener('click', cancelarModo);
 
+// El lector solo escribe en el elemento con foco — se recupera si se pierde
 document.addEventListener('click', () => { if (modoActual) input.focus(); });
 window.addEventListener('focus',   () => { if (modoActual) input.focus(); });
+
+// ── Captura NFC ───────────────────────────────────────────────────────────────
+// El lector HID escribe el UID carácter a carácter y pulsa Enter al final
 
 input.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
@@ -58,6 +66,7 @@ input.addEventListener('keydown', (e) => {
   if (uid && modoActual && !procesando) procesarUID(uid);
 });
 
+// Fallback: procesa tras 150ms si el lector no envía Enter
 input.addEventListener('input', () => {
   if (!modoActual) { input.value = ''; buffer = ''; return; }
   buffer = input.value;
@@ -70,9 +79,13 @@ input.addEventListener('input', () => {
   }, 150);
 });
 
+// ── Normalización del UID ─────────────────────────────────────────────────────
+// Algunos lectores emiten el UID en hex, otros en decimal.
+// Esta función convierte siempre al mismo formato (decimal, 10 dígitos) que espera Odoo.
 function normalizarUID(raw) {
   const limpio = raw.trim().replace(/[\s\-:]/g, '');
   if (/[A-Fa-f]/.test(limpio)) {
+    // Hex → invertir bytes (little-endian) y convertir a decimal
     const bytes = (limpio.match(/.{2}/g) || []).reverse();
     let decimal = 0;
     for (const byte of bytes) decimal = decimal * 256 + parseInt(byte, 16);
@@ -81,6 +94,9 @@ function normalizarUID(raw) {
   return limpio.padStart(10, '0');
 }
 
+// ── Petición al servidor ──────────────────────────────────────────────────────
+// Envía el UID y el modo (entrada/salida) a Odoo vía JSON-RPC.
+// AbortController cancela la petición si tarda más de 3 segundos.
 async function procesarUID(uid) {
   uid = normalizarUID(uid);
   procesando = true;
@@ -120,6 +136,9 @@ async function procesarUID(uid) {
   }
 }
 
+// ── Overlay ───────────────────────────────────────────────────────────────────
+
+// Rellena el overlay y lo muestra. Devuelve la hora para usarla en la tira inferior.
 function mostrarOverlay(tipo, simbolo, titulo, nombre, mostrarLabel) {
   const ahora = new Date();
   overlayBox.className = `overlay-box overlay-${tipo}`;
@@ -138,7 +157,6 @@ function mostrarResultado(persona, movimiento) {
   const tipo      = esEntrada ? 'entrada' : 'salida';
   const simbolo   = esEntrada ? '✓' : '↑';
   const ahora     = mostrarOverlay(tipo, simbolo, esEntrada ? 'ENTRADA REGISTRADA' : 'SALIDA REGISTRADA', persona, true);
-
   resultTexto.textContent = `${simbolo} ${movimiento.toUpperCase()}  —  ${persona}`;
   resultTexto.className   = `result-texto ${tipo}`;
   resultHora.textContent  = ahora.toLocaleString('es-ES');
@@ -149,6 +167,7 @@ function mostrarError(mensaje) {
   mostrarOverlay('error', '✗', 'OPERACIÓN DENEGADA', mensaje, false);
 }
 
+// Se cierra solo tras 4s o al tocar la pantalla
 function abrirOverlay() {
   overlay.classList.add('visible');
   clearTimeout(overlayTimer);
